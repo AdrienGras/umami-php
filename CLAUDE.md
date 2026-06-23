@@ -102,9 +102,23 @@ S'ils sont absents : `bash scripts/clone-references.sh` (voir BOOTSTRAP.md).
 ## Pièges Saloon à garder en tête (détail dans `docs/SALOON_LIBRARY_DESIGN.md` §8)
 
 - `AlwaysThrowOnErrors` + probe booléen → l'appelant doit `try/catch` (pas de `false`).
-- Collision `$body` avec `HasJsonBody` → nommer le payload `$payload`.
+- **Mécanique d'exception v4 (vérifié au source)** : `AlwaysThrowOnErrors` → `$response->throw()` →
+  `shouldThrowRequestException()` (défaut `ManagesExceptions` = `$response->failed()`), **pas**
+  `toException()`. Pour requalifier un **2xx** (le bot `beep/boop`), la Response custom override
+  `failed()` (`parent::failed() || isBotFiltered()`) **et** `createException()` (choix du type). La doc
+  `SALOON_LIBRARY_DESIGN.md` §4.4 décrit le mécanisme **v3** (override `toException()`) : NE PAS le
+  suivre tel quel en v4. Détail : `docs/QUIRKS.md` + `docs/CONVENTIONS.md`.
+- **Propriétés de `Request` réservées** : `$body`, `$query`, `$headers`, `$config` sont déjà déclarées
+  par Saloon → les redéclarer (promues/`readonly`) est une **fatal error**. Body → `$payload`/`$hits` ;
+  query → `$queryParams`.
+- **Tracking : le UA par défaut de la lib est flagué bot** par Umami (`isbot`) → relayer le
+  `payload.userAgent` du **visiteur** (il prime sur le header), sinon `BotFilteredException`.
 - `Request::resolveBaseUrl()` ignoré par Saloon → URL absolue + `allowBaseUrlOverride` pour un hôte alternatif. ⚠ à vérifier v4 : la surcharge d'URL absolue était la faille SSRF CVE-2026-33182, durcie en v4 — re-confirmer le mécanisme exact au source/Context7 avant usage.
 - Multipart : `value` = resource ouverte, jamais une string (non pertinent ici a priori, mais à l'esprit).
+
+> **Outillage de test (env hôte)** : `rtk` corrompt les commandes shell multi-lignes complexes
+> (substitutions `$()`, heredocs) — pour tout test live non-trivial, écrire un `.sh` dans le scratchpad
+> et l'exécuter via `bash`, plutôt que d'inliner. Cf. `docs/QUIRKS.md`.
 
 ## Lancer / tester
 

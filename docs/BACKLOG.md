@@ -21,7 +21,23 @@ Une fois faite, déplace-la en `INDEX.md` (livré) ou supprime-la (abandonnée).
 
 ## Domaines API (selon arbitrage — cf. spec contrat)
 
+- [ ] **`WebsiteEntrypoint`** (CRUD `/api/websites` + `/[id]`) : prochain domaine logique (étape 7.4).
 - [ ] `UserEntrypoint` / `TeamEntrypoint` / `ReportEntrypoint` : candidats BACKLOG si hors usage immédiat.
+
+## Reste à faire sur les domaines livrés (Tracking / Auth / Stats)
+
+- [ ] **README / quickstart** (critère d'acceptation v1.0.0) : tracking (note **UA visiteur
+  obligatoire** + `try/catch BotFilteredException`), auth+reporting, note `logout` no-op sans Redis,
+  note probe booléen → `try/catch`.
+- [ ] **Sous-routes Stats** non couvertes : `metrics/expanded`, `events/series`, `events/stats`,
+  `sessions/stats|weekly|[sessionId]` (+ activity/properties/replays), `event-data/*`,
+  `session-data/*`. À ajouter au `StatsEntrypoint` selon besoin.
+- [ ] **DTO de sortie typés** (au lieu d'`array` brut) pour Stats/Auth si la DX le justifie
+  (factory pure dans `Utils/`, cf. SALOON_LIBRARY_DESIGN §7.1).
+- [ ] **Enums `Unit` / `Compare`** pour `Period` (actuellement `?string` : `unit` ∈ year/month/day/
+  hour/minute ; `compare` ∈ prev/yoy) — cohérence avec la convention « enums backed ».
+- [ ] **`identify`** : test d'intégration de rattachement distinctId complet (via API sessions) —
+  actuellement smoke (200 accepté).
 
 ## Découvertes discovery à traiter à l'implémentation
 

@@ -6,6 +6,31 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 
 ---
 
+## 2026-06-23 — 🏁 Récap de session (étapes 4 → 7.3)
+
+**Grosse session.** Partie d'un bootstrap discovery-only, on a livré l'infra de test + 3 domaines
+métier de la lib, tout en TDD, porte verte à chaque commit.
+
+- **Étape 4** — instance Umami docker de test + `scripts/seed-umami.sh` idempotent + dispositif
+  anti-200 validé live (`9391ba0`).
+- **Étape 5** — socle transport-only : Connector, `UmamiApiResponse` (requalif `beep/boop`),
+  exceptions, `SkipsAuth`, `AbstractEntrypoint` (`013d654`).
+- **Étape 7.1** — **Tracking** : `send/batch` + `pageview/event/identify`, `Payload`, `CollectionType` (`4c49692`).
+- **Étape 7.2** — **Auth** : `login/logout/verify`, token mutable + `withToken` (`4d7fa20`).
+- **Étape 7.3** — **Stats** : `stats/metrics/pageviews/events/sessions/active`, `Period`/`Filters`/`MetricType` (`8f61d37`).
+
+**État** : 6 commits sur `main`, **48 tests** (39 unit + 9 intégration) verts, instance docker up + seedée.
+API publique : `$umami->tracking|auth|stats`.
+
+**Reprise → étape 7.4 (Websites CRUD)** ou **README** (cf. `BACKLOG.md`). Le pattern est rodé :
+value objects d'entrée + Requests (attention propriétés réservées `$body/$query/...`) + Entrypoint
++ TDD (RED via stub/`MockClient`, GREEN, porte). Auth déjà géré par le Connector après `login()`.
+
+**Note working-tree** : `.vscode/settings.json` apparaît supprimé (non commité, pas de mon fait) —
+laissé tel quel, à trancher avec Adrien.
+
+---
+
 ## 2026-06-23 — Domaine Stats/reporting (BOOTSTRAP étape 7.3)
 
 ### Dernière chose faite
