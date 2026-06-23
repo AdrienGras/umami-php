@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace AdrienGras\Umami\Tests\Integration;
 
+use AdrienGras\Umami\Enums\MetricType;
+use AdrienGras\Umami\Stats\Period;
 use AdrienGras\Umami\UmamiApi;
 use PHPUnit\Framework\TestCase;
-use Saloon\Enums\Method;
-use Saloon\Http\Request;
 
 /**
  * Base for integration tests hitting the docker Umami instance.
@@ -70,45 +70,25 @@ abstract class IntegrationTestCase extends TestCase
     /**
      * Distinct `path` values recorded for the test website in the last hour.
      *
+     * Dogfoods StatsEntrypoint::metrics().
+     *
      * @return list<string>
      */
     protected function recordedPaths(): array
     {
         $now = (int) (microtime(true) * 1000);
-        $start = $now - 3_600_000;
-        $end = $now + 3_600_000;
 
-        $request = new class ($this->websiteId, $start, $end) extends Request {
-            protected Method $method = Method::GET;
-
-            public function __construct(
-                private readonly string $websiteId,
-                private readonly int $startAt,
-                private readonly int $endAt,
-            ) {
-            }
-
-            public function resolveEndpoint(): string
-            {
-                return "/api/websites/{$this->websiteId}/metrics";
-            }
-
-            /** @return array<string, scalar> */
-            protected function defaultQuery(): array
-            {
-                return ['type' => 'path', 'startAt' => $this->startAt, 'endAt' => $this->endAt];
-            }
-        };
-
-        $rows = $this->connector($this->reportingToken())->send($request)->json();
+        $rows = $this->connector($this->reportingToken())->stats->metrics(
+            $this->websiteId,
+            MetricType::Path,
+            Period::between($now - 3_600_000, $now + 3_600_000),
+        );
 
         $paths = [];
 
-        if (is_array($rows)) {
-            foreach ($rows as $row) {
-                if (is_array($row) && isset($row['x']) && is_string($row['x'])) {
-                    $paths[] = $row['x'];
-                }
+        foreach ($rows as $row) {
+            if (isset($row['x']) && is_string($row['x'])) {
+                $paths[] = $row['x'];
             }
         }
 

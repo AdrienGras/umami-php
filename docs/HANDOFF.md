@@ -6,6 +6,40 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 
 ---
 
+## 2026-06-23 — Domaine Stats/reporting (BOOTSTRAP étape 7.3)
+
+### Dernière chose faite
+- **Stats livré en TDD** (39 tests unit + 9 intégration verts, porte verte).
+  - `src/Entrypoints/StatsEntrypoint.php` (`$umami->stats`) : `stats`, `metrics`, `pageviews`,
+    `events`, `sessions`, `active`. Construit la query depuis `Period`+`Filters`+extras.
+  - Value objects `src/Stats/Period.php` (`between` epoch **ms** / `betweenDates`, toQuery) et
+    `src/Stats/Filters.php` (filterParams complet, toQuery omet nuls). Enum `src/Enums/MetricType.php`.
+  - Requests `src/Requests/Stats/*` via base `AbstractStatRequest` (GET, segment par sous-classe).
+  - **Refactor** : `asObject()`/`asList()` remontés dans `AbstractEntrypoint` (réutilisés par Auth+Stats).
+  - **Dogfood** : `IntegrationTestCase::recordedPaths()` utilise `stats->metrics(type=path)`.
+- **Nouveau QUIRK** : `Saloon\Http\Request::$query` (comme `$body`) est réservé → propriété
+  `$queryParams`. Consigné QUIRKS + CONVENTIONS.
+
+### Trucs en suspens
+- Sous-routes stats non couvertes (volontaire) : `metrics/expanded`, `events/series`, `events/stats`,
+  `sessions/stats|weekly|[id]`, `event-data/*`, `session-data/*`. → BACKLOG si besoin.
+- Réponses retournées en **array décodé** (pas de DTO de sortie typé pour stats) — décision
+  pragmatique (formes variables). DTO possible plus tard.
+- README quickstart toujours à écrire (tracking + auth + stats).
+
+### Prochaine chose à creuser
+- **BOOTSTRAP étape 7.4 — Websites CRUD** (`GET/POST/DELETE /api/websites` + `/[id]`), ou
+  **Users/Teams/Reports** selon arbitrage (candidats BACKLOG, cf. spec contrat). Le Connector
+  authentifie déjà (login). Pattern établi : value objects d'entrée + Requests + Entrypoint + TDD.
+
+### Notes pour future Claude
+- Stats : `$umami->auth->login(...)` puis `$umami->stats->stats($id, Period::between($startMs,$endMs))`.
+  **epoch ms** pour `between`. `Filters` pour les filtres optionnels. `metrics` exige un `MetricType`.
+- Inspecter une query construite en test : capturer le `PendingRequest` via un **mock callable**
+  (`new MockClient([fn(PendingRequest $r) => MockResponse::make(...)])`) puis `$r->query()->all()`.
+
+---
+
 ## 2026-06-23 — Domaine Auth (BOOTSTRAP étape 7.2)
 
 ### Dernière chose faite

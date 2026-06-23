@@ -6,6 +6,7 @@ namespace AdrienGras\Umami;
 
 use AdrienGras\Umami\Contracts\SkipsAuth;
 use AdrienGras\Umami\Entrypoints\AuthEntrypoint;
+use AdrienGras\Umami\Entrypoints\StatsEntrypoint;
 use AdrienGras\Umami\Entrypoints\TrackingEntrypoint;
 use AdrienGras\Umami\Responses\UmamiApiResponse;
 use Saloon\Http\Connector;
@@ -33,6 +34,9 @@ class UmamiApi extends Connector
     /** Auth façade: login/logout/verify. */
     public readonly AuthEntrypoint $auth;
 
+    /** Stats/reporting façade: stats/metrics/pageviews/events/sessions/active. */
+    public readonly StatsEntrypoint $stats;
+
     /**
      * Current reporting Bearer token. Seeded from $apiToken, then updated by
      * {@see withToken()} (e.g. after AuthEntrypoint::login()).
@@ -47,6 +51,7 @@ class UmamiApi extends Connector
         $this->bearerToken = $apiToken;
         $this->tracking = new TrackingEntrypoint($this);
         $this->auth = new AuthEntrypoint($this);
+        $this->stats = new StatsEntrypoint($this);
 
         if ($this->useDebug) {
             $this->debug();

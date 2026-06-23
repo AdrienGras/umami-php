@@ -62,7 +62,9 @@ class CreateFoo extends Request implements HasBody
 - **Transport-only** : la transformation/normalisation/garde d'entrée vit dans l'**Entrypoint**,
   jamais dans la Request (qui est « stupide ») ni dans le Connector (infra).
 - **Optionnels nuls omis** du body/query (pas de `null` envoyé).
-- **Payload nommé `$payload`** (jamais `$body`) dès qu'un trait `HasJsonBody`/`HasFormBody`/`HasMultipartBody` est utilisé.
+- **Propriétés de Request réservées** : ne jamais nommer une propriété de `Request` `$body`,
+  `$query`, `$headers` ou `$config` (déjà déclarées par Saloon → fatal). Body → `$payload`/`$hits` ;
+  query → `$queryParams`.
 - **Gardes d'entrée** (non-vide, longueurs, format) dans l'Entrypoint **avant** tout I/O ; trim avant validation ET avant envoi.
 - **Tracking** : Requests marquées d'un marqueur d'interface (ex. `SkipsAuth`) → exclues de l'injection du Bearer.
 - **Erreurs** : mapping via la Response custom `UmamiApiResponse` — override `failed()` + `createException()` (mécanique **v4**, cf. ci-dessous) + cas `beep/boop` → `BotFilteredException`.
@@ -151,6 +153,12 @@ Pour un endpoint à payload riche (≥ ~6 champs), l'Entrypoint expose :
 
 Request `implements HasBody, SkipsAuth` pour le tracking ; le payload prêt est passé tel quel
 (`SendHit($type, $payload)`). Body array racine pour les endpoints « tableau » (`SendBatch`).
+
+Pour les **GET à query riche** (Stats) : value objects `Period` (deux contrats de date, `between`
+epoch ms / `betweenDates`) + `Filters` avec `toQuery()` omettant les nuls ; l'Entrypoint merge
+`Period`+`Filters`+extras (type/limit/page/…). Requests via une base `AbstractStatRequest`
+(GET, segment par sous-classe, `$queryParams`). Décodage des réponses : helpers **`asObject()`**
+(objet) / **`asList()`** (liste d'objets) factorisés dans `AbstractEntrypoint`.
 
 ## Tests unitaires — mock Saloon v4
 

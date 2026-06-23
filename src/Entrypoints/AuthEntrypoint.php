@@ -72,24 +72,4 @@ readonly class AuthEntrypoint extends AbstractEntrypoint
     {
         return $this->asObject($this->api->send(new Verify())->json());
     }
-
-    /**
-     * Normalise a decoded JSON value into a string-keyed array (or empty).
-     *
-     * @return array<string, mixed>
-     */
-    private function asObject(mixed $value): array
-    {
-        if (!is_array($value)) {
-            return [];
-        }
-
-        $object = [];
-
-        foreach ($value as $key => $item) {
-            $object[(string) $key] = $item;
-        }
-
-        return $object;
-    }
 }

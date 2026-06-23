@@ -119,6 +119,22 @@ cycle de vie. Pas de refresh non plus.
 
 **Référence** : `reference/umami/src/app/api/auth/logout/route.ts:5`.
 
+## `Saloon\Http\Request::$query` est réservé (collision comme `$body`) (2026-06-23, étape 7.3)
+
+**Découvert** : `AbstractStatRequest` avec une propriété promue `protected readonly array $query`.
+
+**Symptôme** : `PHP Fatal error: Cannot redeclare non-readonly property Saloon\Http\Request::$query
+as readonly …`. La classe ne se charge pas.
+
+**Cause** : `Saloon\Http\Request` déclare déjà des propriétés `$query` (et `$headers`, `$config`,
++ `$body` via le trait) pour ses `RequestProperties`. Les redéclarer (surtout en `readonly`) casse.
+Même famille que la collision `$body`/`HasJsonBody` (SALOON_LIBRARY_DESIGN §8.2).
+
+**Workaround** : nommer le paramètre/propriété autrement — `$queryParams` (et `$payload`/`$hits`
+pour le body). Ne jamais réutiliser `$query`/`$body`/`$headers`/`$config` comme propriété de Request.
+
+**Référence** : `src/Requests/Stats/Impl/AbstractStatRequest.php`.
+
 ## Le User-Agent par défaut de la lib est flagué bot par Umami (2026-06-23, étape 7.1)
 
 **Découvert** : test live d'un hit `/api/send` avec le UA du Connector
