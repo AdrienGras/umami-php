@@ -131,7 +131,8 @@ Réf : `src/app/api/auth/login/route.ts`. **PUBLIC** (`skipAuth:true`). **Schém
 `{ username: string, password: string }`. **Succès** (`:44`) :
 `{ token, user: { id, username, role, createdAt, isAdmin, teams } }` (✓ confirmé live étape 4 :
 `token` + `user.{username,role,isAdmin}`). **Échec** : `401`
-`{error:{code:'incorrect-username-password', ...}}`. Le `token` alimente le Bearer (§1).
+`{error:{code:'incorrect-username-password', ...}}` → **✓ étape 7.2 : mappé en `UmamiApiException`**
+(login mauvais mot de passe testé live). Le `token` alimente le Bearer (§1).
 
 ---
 
@@ -145,8 +146,8 @@ Réf : `src/app/api/auth/login/route.ts`. **PUBLIC** (`skipAuth:true`). **Schém
 
 #### `POST /api/auth/verify`
 - Auth Bearer. Entrée : aucune. Réponse : `auth.user` (+ `teams`). En `CLOUD_MODE`, ajoute
-  `user.subscription`. ⚠ à vérifier (live) : champs exacts du `user` (présence/omission password).
-  Réf `auth/verify/route.ts:6`.
+  `user.subscription`. **✓ étape 7.2 : le body EST l'objet user** (`{id,username,isAdmin,…}`,
+  `username` confirmé live). ⚠ à vérifier (live) : présence/omission `password`. Réf `auth/verify/route.ts:6`.
 
 #### `POST /api/auth/sso`
 - Auth Bearer. Réponse `{user, token}` (nouveau token TTL 24 h). **Exige Redis** sinon `500

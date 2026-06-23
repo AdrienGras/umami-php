@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AdrienGras\Umami;
 
 use AdrienGras\Umami\Contracts\SkipsAuth;
+use AdrienGras\Umami\Entrypoints\AuthEntrypoint;
 use AdrienGras\Umami\Entrypoints\TrackingEntrypoint;
 use AdrienGras\Umami\Responses\UmamiApiResponse;
 use Saloon\Http\Connector;
@@ -29,28 +30,52 @@ class UmamiApi extends Connector
     /** Tracking façade: `/api/send`, `/api/batch`. */
     public readonly TrackingEntrypoint $tracking;
 
+    /** Auth façade: login/logout/verify. */
+    public readonly AuthEntrypoint $auth;
+
+    /**
+     * Current reporting Bearer token. Seeded from $apiToken, then updated by
+     * {@see withToken()} (e.g. after AuthEntrypoint::login()).
+     */
+    private ?string $bearerToken;
+
     public function __construct(
         public readonly string $baseUrl,
         public readonly ?string $apiToken = null,
         public readonly bool $useDebug = false,
     ) {
+        $this->bearerToken = $apiToken;
         $this->tracking = new TrackingEntrypoint($this);
+        $this->auth = new AuthEntrypoint($this);
 
         if ($this->useDebug) {
             $this->debug();
         }
 
-        // Inject the reporting Bearer on every request except tracking ones
-        // (SkipsAuth) — Umami's tracking endpoints are skipAuth server-side.
-        if (null !== $this->apiToken) {
-            $this->middleware()->onRequest(function (PendingRequest $pendingRequest): void {
-                if ($pendingRequest->getRequest() instanceof SkipsAuth) {
-                    return;
-                }
+        // Inject the current reporting Bearer on every request except tracking
+        // ones (SkipsAuth) — Umami's tracking endpoints are skipAuth server-side.
+        $this->middleware()->onRequest(function (PendingRequest $pendingRequest): void {
+            if (null === $this->bearerToken) {
+                return;
+            }
 
-                $pendingRequest->headers()->add('Authorization', 'Bearer ' . $this->apiToken);
-            });
-        }
+            if ($pendingRequest->getRequest() instanceof SkipsAuth) {
+                return;
+            }
+
+            $pendingRequest->headers()->add('Authorization', 'Bearer ' . $this->bearerToken);
+        });
+    }
+
+    /**
+     * Set (or clear, with null) the reporting Bearer token used for subsequent
+     * non-tracking requests. Returns $this for chaining.
+     */
+    public function withToken(?string $token): static
+    {
+        $this->bearerToken = $token;
+
+        return $this;
     }
 
     public function resolveBaseUrl(): string

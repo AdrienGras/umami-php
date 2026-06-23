@@ -129,6 +129,16 @@ if (null !== $this->apiToken) {
 
 `baseUrl` **requis** (pas de défaut bidon — PHP pur, instanciation explicite). `$response = UmamiApiResponse::class`.
 
+**Token mutable post-login** : le Bearer courant est une propriété **privée mutable**
+(`$bearerToken`, init = `$apiToken`), le middleware est **toujours enregistré** et lit cette
+propriété (skip si `null` OU `SkipsAuth`). `withToken(?string): static` la met à jour.
+`AuthEntrypoint::login()` appelle `withToken($token)` → les appels reporting suivants sur le même
+connector sont authentifiés. L'Entrypoint reste `readonly` (il mute le Connector, pas lui-même).
+
+**JSON → array<string,mixed>** : phpstan max n'infère pas des clés string depuis `is_array()`.
+Normaliser via un helper qui itère et `(string) $key` (pas de `@var`/cast de contournement) — cf.
+`AuthEntrypoint::asObject()`.
+
 ## Entrypoint — entrée par value object + raccourcis (décision projet)
 
 Pour un endpoint à payload riche (≥ ~6 champs), l'Entrypoint expose :

@@ -6,10 +6,8 @@ namespace AdrienGras\Umami\Tests\Integration;
 
 use AdrienGras\Umami\UmamiApi;
 use PHPUnit\Framework\TestCase;
-use Saloon\Contracts\Body\HasBody;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
-use Saloon\Traits\Body\HasJsonBody;
 
 /**
  * Base for integration tests hitting the docker Umami instance.
@@ -49,40 +47,24 @@ abstract class IntegrationTestCase extends TestCase
         return new UmamiApi(baseUrl: $this->baseUrl, apiToken: $apiToken);
     }
 
+    protected function username(): string
+    {
+        return $this->env['UMAMI_TEST_USERNAME'] ?? 'admin';
+    }
+
+    protected function password(): string
+    {
+        return $this->env['UMAMI_TEST_PASSWORD'] ?? 'umami';
+    }
+
     /**
      * Log in with the seeded admin and return a Bearer token for reporting calls.
+     *
+     * Dogfoods AuthEntrypoint::login().
      */
     protected function reportingToken(): string
     {
-        $username = $this->env['UMAMI_TEST_USERNAME'] ?? 'admin';
-        $password = $this->env['UMAMI_TEST_PASSWORD'] ?? 'umami';
-
-        $login = new class ($username, $password) extends Request implements HasBody {
-            use HasJsonBody;
-
-            protected Method $method = Method::POST;
-
-            public function __construct(
-                private readonly string $username,
-                private readonly string $password,
-            ) {
-            }
-
-            public function resolveEndpoint(): string
-            {
-                return '/api/auth/login';
-            }
-
-            /** @return array<string, string> */
-            protected function defaultBody(): array
-            {
-                return ['username' => $this->username, 'password' => $this->password];
-            }
-        };
-
-        $token = $this->connector()->send($login)->json('token');
-
-        return is_string($token) ? $token : '';
+        return $this->connector()->auth->login($this->username(), $this->password())->token;
     }
 
     /**

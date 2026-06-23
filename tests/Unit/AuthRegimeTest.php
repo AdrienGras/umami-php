@@ -69,4 +69,26 @@ final class AuthRegimeTest extends TestCase
 
         $this->assertArrayNotHasKey('Authorization', $headers);
     }
+
+    public function testWithTokenInjectsBearerAfterConstruction(): void
+    {
+        $api = new UmamiApi(baseUrl: 'http://umami.test');
+        $api->withMockClient(new MockClient([MockResponse::make(['ok' => true], 200)]));
+        $api->withToken('late-token');
+
+        $headers = $api->send($this->reportingRequest())->getPendingRequest()->headers()->all();
+
+        $this->assertSame('Bearer late-token', $headers['Authorization'] ?? null);
+    }
+
+    public function testWithTokenNullClearsBearer(): void
+    {
+        $api = new UmamiApi(baseUrl: 'http://umami.test', apiToken: 'initial');
+        $api->withMockClient(new MockClient([MockResponse::make(['ok' => true], 200)]));
+        $api->withToken(null);
+
+        $headers = $api->send($this->reportingRequest())->getPendingRequest()->headers()->all();
+
+        $this->assertArrayNotHasKey('Authorization', $headers);
+    }
 }

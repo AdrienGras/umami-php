@@ -6,6 +6,46 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 
 ---
 
+## 2026-06-23 — Domaine Auth (BOOTSTRAP étape 7.2)
+
+### Dernière chose faite
+- **Auth livré en TDD** (28 tests unit + 6 intégration verts, porte verte).
+  - `src/Entrypoints/AuthEntrypoint.php` (`$umami->auth`) : `login()` (gardes username/password,
+    envoie `Login`, **configure le token du Connector** via `withToken`, retourne `LoginResult`),
+    `logout()` (envoie `Logout` + efface le token local), `verify()` (retourne le user array).
+  - `src/Auth/LoginResult.php` (readonly `token` + `user`).
+  - `src/Requests/Auth/{Login,Logout,Verify}.php`. `Login` = public `SkipsAuth` (pas de Bearer) ;
+    `Logout`/`Verify` = Bearer.
+  - **Connector token mutable** : `private ?string $bearerToken` (init = `apiToken`), middleware
+    **toujours enregistré** (skip si token null OU `SkipsAuth`), méthode publique
+    `withToken(?string): static`. AuthRegimeTest préservé.
+- **Dogfood** : `IntegrationTestCase::reportingToken()` utilise désormais `auth->login()` (plus la
+  Request anonyme). `AuthIntegrationTest` : login réel (token + user admin + isAdmin), verify,
+  **401 mauvais mot de passe → `UmamiApiException`** (confirmé live).
+- Helper `AuthEntrypoint::asObject(mixed)` : normalise un JSON décodé en `array<string,mixed>`
+  (phpstan max n'infère pas les clés string depuis `is_array` — pas de cast/@var de contournement).
+
+### Trucs en suspens
+- `logout` côté serveur = no-op sans Redis (token reste valide) ; la lib oublie le token côté client
+  (seul effet fiable). Documenté.
+- README quickstart (tracking + auth/reporting, note try/catch BotFilteredException, note UA visiteur,
+  note logout no-op) → toujours à écrire.
+
+### Prochaine chose à creuser
+- **BOOTSTRAP étape 7.3 — Stats/reporting** : `StatsEntrypoint` (`stats`, `metrics`, `pageviews`,
+  `events`, `sessions`, `active`). Toutes GET + Bearer (déjà géré par le Connector après login).
+  Attention aux **deux contrats de date** (cf. QUIRKS) et `startAt/endAt` en **epoch ms**. Enum
+  `MetricType` (EVENT_COLUMNS/SESSION_COLUMNS, cf. API_UMAMI §2). Le harnais d'intégration a déjà
+  un `recordedPaths()` (metrics type=path) à transposer en `StatsEntrypoint`.
+
+### Notes pour future Claude
+- `$umami->auth->login($u,$p)` configure le token ; les appels reporting suivants sur **le même
+  connector** sont authentifiés automatiquement. `$umami->withToken($persisted)` pour réutiliser un token.
+- Pattern Entrypoint qui mute le Connector : OK (le Connector porte l'état d'auth de transport, cf.
+  TokenStore du pattern §5). L'Entrypoint reste `readonly` (il ne fait que tenir la réf au Connector).
+
+---
+
 ## 2026-06-23 — Domaine Tracking (BOOTSTRAP étape 7.1)
 
 ### Dernière chose faite
