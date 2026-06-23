@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AdrienGras\Umami\Tests\Unit\Website;
 
 use AdrienGras\Umami\Enums\MaskLevel;
+use AdrienGras\Umami\Stats\Period;
 use AdrienGras\Umami\UmamiApi;
 use AdrienGras\Umami\Website\ReplayConfig;
 use InvalidArgumentException;
@@ -16,7 +17,7 @@ use Saloon\Http\PendingRequest;
 final class WebsiteEntrypointTest extends TestCase
 {
     /**
-     * @param array<string, mixed> $responseBody
+     * @param array<array-key, mixed> $responseBody
      */
     private function apiCapturing(array $responseBody = []): UmamiApi
     {
@@ -128,5 +129,94 @@ final class WebsiteEntrypointTest extends TestCase
         $pending = $api->getMockClient()?->getLastPendingRequest();
         self::assertInstanceOf(PendingRequest::class, $pending);
         self::assertSame('/api/websites/w1', $pending->getRequest()->resolveEndpoint());
+    }
+
+    public function testResetHitsEndpoint(): void
+    {
+        $api = $this->apiCapturing(['ok' => true]);
+
+        $api->websites->reset('w1');
+
+        $pending = $api->getMockClient()?->getLastPendingRequest();
+        self::assertInstanceOf(PendingRequest::class, $pending);
+        self::assertSame('/api/websites/w1/reset', $pending->getRequest()->resolveEndpoint());
+    }
+
+    public function testTransferToUserBuildsBody(): void
+    {
+        $api = $this->apiCapturing(['id' => 'w1']);
+
+        $api->websites->transfer('w1', userId: 'u1');
+
+        $pending = $api->getMockClient()?->getLastPendingRequest();
+        self::assertInstanceOf(PendingRequest::class, $pending);
+        $body = $pending->body();
+        self::assertSame(['userId' => 'u1'], null === $body ? [] : $body->all());
+        self::assertSame('/api/websites/w1/transfer', $pending->getRequest()->resolveEndpoint());
+    }
+
+    public function testTransferToTeamBuildsBody(): void
+    {
+        $api = $this->apiCapturing(['id' => 'w1']);
+
+        $api->websites->transfer('w1', teamId: 't1');
+
+        $pending = $api->getMockClient()?->getLastPendingRequest();
+        self::assertInstanceOf(PendingRequest::class, $pending);
+        $body = $pending->body();
+        self::assertSame(['teamId' => 't1'], null === $body ? [] : $body->all());
+    }
+
+    public function testTransferRejectsNoTarget(): void
+    {
+        $api = $this->apiCapturing();
+
+        $this->expectException(InvalidArgumentException::class);
+        $api->websites->transfer('w1');
+    }
+
+    public function testTransferRejectsBothTargets(): void
+    {
+        $api = $this->apiCapturing();
+
+        $this->expectException(InvalidArgumentException::class);
+        $api->websites->transfer('w1', userId: 'u1', teamId: 't1');
+    }
+
+    public function testDateRangeReturnsObject(): void
+    {
+        $api = $this->apiCapturing(['mindate' => '2026-01-01', 'maxdate' => '2026-06-01']);
+
+        $result = $api->websites->dateRange('w1');
+
+        $pending = $api->getMockClient()?->getLastPendingRequest();
+        self::assertInstanceOf(PendingRequest::class, $pending);
+        self::assertSame('2026-01-01', $result['mindate']);
+        self::assertSame('/api/websites/w1/daterange', $pending->getRequest()->resolveEndpoint());
+    }
+
+    public function testValuesBuildsQueryAndReturnsList(): void
+    {
+        $api = $this->apiCapturing([['value' => '/home'], ['value' => '/about']]);
+
+        $result = $api->websites->values('w1', 'path', Period::between(1000, 2000), search: 'ho');
+
+        $pending = $api->getMockClient()?->getLastPendingRequest();
+        self::assertInstanceOf(PendingRequest::class, $pending);
+        self::assertSame([['value' => '/home'], ['value' => '/about']], $result);
+        $query = $pending->query()->all();
+        self::assertSame('path', $query['type']);
+        self::assertSame('ho', $query['search']);
+        self::assertSame(1000, $query['startAt']);
+        self::assertSame(2000, $query['endAt']);
+        self::assertSame('/api/websites/w1/values', $pending->getRequest()->resolveEndpoint());
+    }
+
+    public function testValuesRejectsEmptyType(): void
+    {
+        $api = $this->apiCapturing();
+
+        $this->expectException(InvalidArgumentException::class);
+        $api->websites->values('w1', '  ', Period::between(1000, 2000));
     }
 }

@@ -8,8 +8,13 @@ use AdrienGras\Umami\Entrypoints\Impl\AbstractEntrypoint;
 use AdrienGras\Umami\Requests\Website\CreateWebsite;
 use AdrienGras\Umami\Requests\Website\DeleteWebsite;
 use AdrienGras\Umami\Requests\Website\GetWebsite;
+use AdrienGras\Umami\Requests\Website\GetWebsiteDateRange;
+use AdrienGras\Umami\Requests\Website\GetWebsiteValues;
 use AdrienGras\Umami\Requests\Website\ListWebsites;
+use AdrienGras\Umami\Requests\Website\ResetWebsite;
+use AdrienGras\Umami\Requests\Website\TransferWebsite;
 use AdrienGras\Umami\Requests\Website\UpdateWebsite;
+use AdrienGras\Umami\Stats\Period;
 use AdrienGras\Umami\Website\ReplayConfig;
 use InvalidArgumentException;
 
@@ -117,6 +122,64 @@ readonly class WebsiteEntrypoint extends AbstractEntrypoint
     public function delete(string $id): void
     {
         $this->api->send(new DeleteWebsite($this->websiteId($id)));
+    }
+
+    /**
+     * Reset (wipe) a website's analytics data. Returns nothing.
+     */
+    public function reset(string $id): void
+    {
+        $this->api->send(new ResetWebsite($this->websiteId($id)));
+    }
+
+    /**
+     * Transfer a website to a user OR a team — exactly one is required.
+     *
+     * @return array<string, mixed>
+     */
+    public function transfer(string $id, ?string $userId = null, ?string $teamId = null): array
+    {
+        $userId = null === $userId ? null : trim($userId);
+        $teamId = null === $teamId ? null : trim($teamId);
+
+        $hasUser = null !== $userId && '' !== $userId;
+        $hasTeam = null !== $teamId && '' !== $teamId;
+
+        if ($hasUser === $hasTeam) {
+            throw new InvalidArgumentException('transfer() requires exactly one of userId or teamId.');
+        }
+
+        $payload = $hasUser ? ['userId' => $userId] : ['teamId' => $teamId];
+
+        return $this->asObject($this->api->send(new TransferWebsite($this->websiteId($id), $payload))->json());
+    }
+
+    /**
+     * Date span of the website's data (`{mindate, maxdate}`).
+     *
+     * @return array<string, mixed>
+     */
+    public function dateRange(string $id): array
+    {
+        return $this->asObject($this->api->send(new GetWebsiteDateRange($this->websiteId($id)))->json());
+    }
+
+    /**
+     * Distinct values for a field (`type` ∈ EVENT_COLUMNS ∪ SESSION_COLUMNS),
+     * over a period. Returns a list of `{value}` entries.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function values(string $id, string $type, Period $period, ?string $search = null): array
+    {
+        $type = $this->nonEmpty($type, 'type');
+
+        $query = $this->compact(array_merge(
+            $period->toQuery(),
+            ['type' => $type, 'search' => $search],
+        ));
+
+        return $this->asList($this->api->send(new GetWebsiteValues($this->websiteId($id), $query))->json());
     }
 
     private function websiteId(string $id): string
