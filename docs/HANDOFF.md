@@ -6,6 +6,43 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 
 ---
 
+## 2026-06-23 — Socle transport-only de la lib (BOOTSTRAP étape 5)
+
+### Dernière chose faite
+- **Socle livré en TDD** (5 tests unit verts, porte `check.sh` verte phpstan max inclus) :
+  - `src/UmamiApi.php` — Connector : `AlwaysThrowOnErrors` + `AcceptsJson`, `$response =
+    UmamiApiResponse`, UA descriptif, **Bearer injecté par middleware sauf `SkipsAuth`**,
+    `baseUrl` requis (pas de défaut bidon).
+  - `src/Responses/UmamiApiResponse.php` — requalif `beep/boop` (200) → `BotFilteredException`
+    via override **`failed()` + `createException()`** (mécanique **v4**, ≠ doc pattern v3).
+  - `src/Exceptions/UmamiApiException.php` (`getStatusCode()`, `errorCode()`) +
+    `BotFilteredException.php` (sous-type). PHP pur, **pas** de `HttpExceptionInterface`.
+  - `src/Contracts/SkipsAuth.php` (marqueur), `src/Entrypoints/Impl/AbstractEntrypoint.php`.
+  - Tests : `tests/Unit/ErrorMappingTest.php` (bot→BotFiltered, 4xx→UmamiApi+errorCode+status),
+    `tests/Unit/AuthRegimeTest.php` (Bearer sur reporting, absent sur `SkipsAuth`, absent sans token).
+- **Vérif source Saloon v4** : `throw()` → `shouldThrowRequestException()` → `failed()` (PAS
+  `toException()`). D'où l'override `failed()` pour requalifier un 2xx. Consigné QUIRKS + CONVENTIONS.
+
+### Trucs en suspens
+- Aucun Entrypoint métier encore (le Connector n'expose pas encore de `public readonly` entrypoint —
+  ils s'ajoutent avec leur domaine). Pas de Request réelle encore.
+- `src/.gitkeep` / `tests/Unit/.gitkeep` devenus inutiles (dossiers peuplés) — à nettoyer au commit.
+
+### Prochaine chose à creuser
+- **BOOTSTRAP étape 7.1 — Tracking** : `TrackingEntrypoint` + Requests `Send`/`Batch`
+  (`implements HasBody, SkipsAuth` ; payload nommé `$payload` ; optionnels nuls omis ; `type`
+  ∈ event/identify/performance ; payload exige exactement un de website/link/pixel). Brancher
+  l'entrypoint en `public readonly` sur le Connector. Tests unit (golden body) + intégration
+  (hit réel + poll stats, test négatif isbot → `BotFilteredException` ET absent). Contrat : `API_UMAMI.md` §3.1/§3.2.
+
+### Notes pour future Claude
+- TDD strict ici : RED vu avant chaque GREEN. Reproduire pour Tracking (golden JSON du body d'abord).
+- Mock Saloon v4 : `MockResponse::make($body,$status)` + `withMockClient` ; inspecter la requête
+  résolue via `$response->getPendingRequest()->headers()->all()`. Classe anonyme Request = `new class ()`.
+- Le contrat `send` réponse `{cache,sessionId,visitId}` et `beep/boop` sont **déjà validés live** (étape 4).
+
+---
+
 ## 2026-06-23 — Instance docker de test + seed + validation anti-200 (BOOTSTRAP étape 4)
 
 ### Dernière chose faite

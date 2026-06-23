@@ -119,6 +119,27 @@ cycle de vie. Pas de refresh non plus.
 
 **Référence** : `reference/umami/src/app/api/auth/logout/route.ts:5`.
 
+## Saloon v4 : `throw()` consulte `failed()`, pas `toException()` (2026-06-23, étape 5)
+
+**Découvert** : lecture de `vendor/saloonphp/saloon/src/Http/Response.php` + `Traits/ManagesExceptions.php`.
+
+**Symptôme** : la doc du pattern (`SALOON_LIBRARY_DESIGN.md` §4.4, écrite pour v3) suggère
+d'override `toException()` avec `if ($this->failed())`. En v4, ça ne suffit PAS à requalifier un
+**2xx** (le bot `beep/boop`) : `AlwaysThrowOnErrors` appelle `$response->throw()` →
+`if (shouldThrowRequestException()) throw toException()`. `shouldThrowRequestException()` délègue
+au Connector/Request (défaut `ManagesExceptions` = `$response->failed()`). Donc un 200 ne lève
+jamais tant que `failed()` retourne `false`.
+
+**Cause** : refonte v4 du pipeline d'exceptions (hooks `hasRequestFailed` / `getRequestException` /
+`shouldThrowRequestException` côté Connector ET Request).
+
+**Workaround** : la Response custom override **`failed()`** (`parent::failed() || isBotFiltered()`)
+pour déclencher le throw, et **`createException()`** (protected) pour choisir le type
+(`BotFilteredException` vs `UmamiApiException`). Cf. `docs/CONVENTIONS.md` (squelette Response v4).
+
+**Référence** : `Response.php:381` (`failed`), `:476` (`throw`), `:439` (`toException`),
+`:451` (`createException`) ; `ManagesExceptions.php`.
+
 ## `rtk` corrompt les commandes shell multi-lignes complexes (2026-06-23, étape 4)
 
 **Découvert** : tests de validation anti-200 (curl + jq + heredoc + arithmétique `$(())`).

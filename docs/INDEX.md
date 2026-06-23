@@ -11,7 +11,8 @@ Voir aussi : `ENVIRONMENT.md` · `QUIRKS.md` · `BACKLOG.md` · `HANDOFF.md` · 
 | Feature | Date | Spec | Plan | Statut | Notes |
 |---|---|---|---|---|---|
 | **Discovery API Umami v3.1.0** | 2026-06-23 | `superpowers/specs/2026-06-23-contrat-lib.md` | — | ✅ livré | `docs/API_UMAMI.md` : 95 handlers cartographiés, 8 publics, 3 points sensibles, checklist 3.3 cochée. Reste `⚠ à vérifier (live)` (étape 4 docker). |
-| _(aucun Entrypoint/Request livré — implémentation à partir de BOOTSTRAP étape 5)_ | | | | | |
+| **Socle transport-only** (BOOTSTRAP étape 5) | 2026-06-23 | `superpowers/specs/2026-06-23-contrat-lib.md` | — | ✅ livré | `UmamiApi` (Connector : AlwaysThrowOnErrors+AcceptsJson, `$response` custom, Bearer hors `SkipsAuth`, UA), `UmamiApiResponse` (requalif `beep/boop`→`BotFilteredException`, mapping v4 `failed()`+`createException()`), `UmamiApiException`+`BotFilteredException`, `AbstractEntrypoint`, interface `SkipsAuth`. **5 tests unit verts** (mapping erreur + régime auth). |
+| _(Entrypoints métier — Tracking en premier, BOOTSTRAP étape 7.1)_ | | | | | |
 
 > Les Entrypoints cibles (Tracking, Auth, Stats, Website, …) sont décrits dans
 > `superpowers/specs/2026-06-23-contrat-lib.md`. Ordre d'implémentation : BOOTSTRAP étape 7.
