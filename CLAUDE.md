@@ -54,7 +54,7 @@ S'ils sont absents : `bash scripts/clone-references.sh` (voir BOOTSTRAP.md).
 1. **Le source bat la doc.** Toute route de l'API Umami se vérifie dans `reference/umami/`
    (`src/app/api/**/route.ts` + `src/tracker/index.js`) avant d'écrire une `Request`.
    `docs/API_UMAMI.md` est produit PAR la discovery du source (bootstrap étape 3), pas
-   l'inverse. Tout point non encore vérifié porte `⚠ à vérifier v3` jusqu'à confirmation.
+   l'inverse. Tout point non encore vérifié porte `⚠ à vérifier (live)` jusqu'à confirmation.
 
 2. **Transport-only (règle n°1 du pattern Saloon).** La lib ne connaît AUCUNE entité métier,
    ne persiste rien, ne décide rien. Transformations/normalisations/gardes dans l'**Entrypoint** ;
@@ -125,7 +125,7 @@ Détails dans `docs/ENVIRONMENT.md` (rempli au bootstrap).
 
 ## Definition of done (toute feature / tout Entrypoint)
 
-- Domaine vérifié au source (`reference/umami/`), marqueur `⚠ à vérifier v3` retiré.
+- Domaine vérifié au source (`reference/umami/`), marqueur `⚠ à vérifier (live)` retiré.
 - Une `Request` par appel HTTP ; transformations dans l'Entrypoint ; optionnels nuls omis.
 - Mapping d'erreur via la Response custom ; cas spéciaux (bot 200) couverts.
 - Tests unit (factories/mapping) + intégration (contre docker, jamais d'assert sur le seul status).
@@ -165,7 +165,7 @@ non-trivial), **avant de signaler la fin du travail**, tu DOIS :
 1. **`docs/INDEX.md`** — ajouter la ligne du domaine/Request livré.
 2. **`docs/HANDOFF.md`** — entrée datée en haut : `Dernière chose faite`, `Trucs en suspens`,
    `Prochaine chose à creuser`, `Notes pour future Claude`.
-3. **`docs/API_UMAMI.md`** — consigner les routes vérifiées et retirer les `⚠ à vérifier v3` levés.
+3. **`docs/API_UMAMI.md`** — consigner les routes vérifiées et retirer les `⚠ à vérifier (live)` levés.
 4. **`docs/QUIRKS.md`** si un piège a été découvert.
 5. **`docs/BACKLOG.md`** si des améliorations ont été identifiées mais non faites.
 6. **`docs/CONVENTIONS.md`** si un nouveau pattern réutilisable a été introduit.

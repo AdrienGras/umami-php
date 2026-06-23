@@ -6,6 +6,46 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 
 ---
 
+## 2026-06-23 — Discovery du source Umami (BOOTSTRAP étape 3)
+
+### Dernière chose faite
+- **`composer.lock` sorti du suivi** (convention librairie) + `.gitignore` — commit `fc76d51`.
+- **Clone `reference/umami@v3.1.0`** (`c78ff36`, gitignoré) via `scripts/clone-references.sh`.
+- **`docs/API_UMAMI.md` produit** : cartographie vérifiée des **95 route handlers**, organisée par
+  domaine, avec les 3 points sensibles approfondis et la checklist 3.3 entièrement cochée. Méthode :
+  extraction mécanique (méthodes + auth) pour les 95, puis 4 sous-agents parallèles pour les schémas
+  par domaine + lecture directe des fichiers critiques (`send`, `batch`, `auth/login`, `lib/request`,
+  `lib/auth`, `lib/response`).
+- **Faits durs établis** :
+  - Bot `{"beep":"boop"}` = **HTTP 200** sur `send/route.ts:131` (et `record`). Signature confirmée.
+  - Auth reporting = `Authorization: Bearer <token>` ; token = `.token` de `login` ; JWT stateless ;
+    pas de refresh ; logout no-op sans Redis.
+  - `identify` : `type:'identify'` + champ `id` (distinctId) ; cache via header `x-umami-cache` ;
+    réponse send `{cache, sessionId, visitId}`.
+  - **8 endpoints publics** (5 `skipAuth` + 3 sans `parseRequest` : `heartbeat`, `scripts/telemetry`,
+    `share/[slug]`).
+  - Enums metric `type` confirmés (EVENT_COLUMNS/SESSION_COLUMNS/`channel`), rôles, operators.
+- **QUIRKS.md** enrichi de 6 pièges (beep/boop send+record, batch compte les bots en `processed`,
+  export = ZIP base64 en JSON, publics sans parseRequest, logout no-op, contrats de date incohérents).
+
+### Trucs en suspens
+- Tout reste `⚠ à vérifier (live)` (casse enums, `required` réels, formes de réponse non tracées au
+  SQL) → ne sera levé qu'à l'**étape 4** (instance docker + seed). `docker-compose.test.yml` est prêt.
+- Pas encore commité : discovery (`docs/API_UMAMI.md`, QUIRKS, INDEX, HANDOFF).
+
+### Prochaine chose à creuser
+- **BOOTSTRAP étape 4** : `docker compose -f docker-compose.test.yml up -d`, créer `scripts/seed-umami.sh`,
+  écrire `.env.test`, valider le dispositif anti-200-silencieux (UA bot → `beep/boop` ET absent des stats).
+- Puis **étape 5** : scaffold de la lib, en commençant par le **Tracking** (étape 7, ordre conseillé).
+
+### Notes pour future Claude
+- Les sous-agents ont des `agentId` réutilisables (SendMessage) si tu veux approfondir un domaine sans
+  re-cloner le contexte. Sinon le source est dans `reference/umami/` (gitignoré).
+- `docs/API_UMAMI.md` §2 = référentiels d'enums + params communs (`@dateRange`/`@filters`/`@paging`) ;
+  §4.3 = table des endpoints stats avec leur contrat de date exact (deux familles, cf. QUIRKS).
+
+---
+
 ## 2026-06-23 — Bootstrap (étapes 1-2) + Saloon v4 + porte de validation + mémoire projet
 
 ### Dernière chose faite

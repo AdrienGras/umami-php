@@ -22,3 +22,12 @@ Une fois faite, déplace-la en `INDEX.md` (livré) ou supprime-la (abandonnée).
 ## Domaines API (selon arbitrage — cf. spec contrat)
 
 - [ ] `UserEntrypoint` / `TeamEntrypoint` / `ReportEntrypoint` : candidats BACKLOG si hors usage immédiat.
+
+## Découvertes discovery à traiter à l'implémentation
+
+- [ ] **`record` (replays)** : endpoint public porteur lui aussi du 200 `{"beep":"boop"}` + exige le
+  header `x-umami-cache`. Si on couvre les replays, `BotFilteredException` doit s'y appliquer aussi.
+- [ ] **`export`** : réponse `{"zip": "<base64>"}` (JSON, pas binaire) → prévoir un helper base64→unzip
+  côté Entrypoint (≠ pattern réponse binaire SALOON_LIBRARY_DESIGN §7.3).
+- [ ] Vérifier en **live** (étape 4) les formes de réponse marquées `⚠ à vérifier (live)` non tracées
+  jusqu'au SQL (event-data/*, session-data/*, sessions détail).

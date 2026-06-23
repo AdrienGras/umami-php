@@ -50,3 +50,86 @@ avant l'écriture de tout code (étape 5), ce qui ferait un faux rouge sur la po
 *vraie* erreur phpstan reste rouge). Le skip disparaît dès qu'il y a du code dans `src/`.
 
 **Référence** : `scripts/check.sh`.
+
+## Le 200 bot `{"beep":"boop"}` existe sur `send` ET `record` (2026-06-23, discovery)
+
+**Découvert** : lecture de `send/route.ts:131` et `record/route.ts`.
+
+**Symptôme** : un User-Agent détecté comme bot (`isbot`) reçoit **HTTP 200** avec body
+`{"beep":"boop"}` — Saloon le voit `successful()`, aucune exception. Vaut pour `/api/send` ET
+`/api/record` (replays).
+
+**Cause** : `if (!process.env.DISABLE_BOT_CHECK && isbot(userAgent)) return json({ beep: 'boop' });`.
+
+**Workaround** : la `Response` custom inspecte le body et requalifie en `BotFilteredException`
+(CLAUDE.md règle 3). À couvrir aussi pour `record` si on l'implémente.
+
+**Référence** : `reference/umami/src/app/api/send/route.ts:131-133`.
+
+## `/api/batch` compte les bots comme `processed` (2026-06-23, discovery)
+
+**Découvert** : `batch/route.ts:39`.
+
+**Symptôme** : dans un batch, un hit bot renvoie `{beep:'boop'}` en 200 → `response.ok` vrai → compté
+dans `processed`, PAS dans `errors`. Donc `processed` n'égale PAS « réellement enregistrés ».
+
+**Cause** : batch ré-invoque `send.POST` par item et ne teste que `response.ok`.
+
+**Workaround** : ne pas se fier à `processed` comme preuve d'ingestion ; vérifier les stats (règle d'or
+intégration : jamais d'assert sur le seul status). Pas de détection bot par-item exposée au client.
+
+**Référence** : `reference/umami/src/app/api/batch/route.ts:36-43`.
+
+## `export` renvoie un ZIP base64 dans du JSON, pas un binaire (2026-06-23, discovery)
+
+**Découvert** : `websites/[websiteId]/export/route.ts`.
+
+**Symptôme** : on pourrait attendre un `application/zip` binaire ; en réalité réponse
+`application/json` = `{"zip": "<base64>"}` contenant un ZIP de 7 CSV.
+
+**Workaround** : côté lib, parser le JSON, base64-décoder `zip`, puis dézipper (pas de gestion de
+réponse binaire / `Accept` override comme SALOON_LIBRARY_DESIGN §7.3).
+
+**Référence** : `reference/umami/src/app/api/websites/[websiteId]/export/route.ts:9`.
+
+## `heartbeat`, `scripts/telemetry`, `share/[slug]` sont PUBLIC sans `parseRequest` (2026-06-23, discovery)
+
+**Découvert** : ces 3 handlers n'appellent jamais `parseRequest` → un grep `skipAuth:true` les
+classait « auth » à tort.
+
+**Symptôme** : `GET /api/heartbeat` (sonde du seed) ne demande **aucune** auth et renvoie `{ok:true}`.
+
+**Cause** : détection d'auth fiable = « pas de Bearer requis » SI (a) `skipAuth:true` OU (b) pas de
+`parseRequest` du tout.
+
+**Workaround** : marquer `SkipsAuth` ces endpoints côté lib. Inventaire d'auth = 8 publics au total
+(`send`, `batch`, `record`, `login`, `config` + `heartbeat`, `scripts/telemetry`, `share/[slug]`).
+
+**Référence** : `reference/umami/src/app/api/heartbeat/route.ts:1`.
+
+## `logout` est un no-op sans Redis (token JWT stateless) (2026-06-23, discovery)
+
+**Découvert** : `auth/logout/route.ts` + `lib/auth.ts`.
+
+**Symptôme** : après `logout`, le Bearer reste valide si l'instance n'a pas Redis (le token est un JWT
+signé stateless ; aucune révocation côté serveur).
+
+**Workaround** : ne pas supposer qu'`logout()` invalide le token côté lib ; le consommateur gère le
+cycle de vie. Pas de refresh non plus.
+
+**Référence** : `reference/umami/src/app/api/auth/logout/route.ts:5`.
+
+## Deux contrats de date incohérents selon l'endpoint (2026-06-23, discovery)
+
+**Découvert** : comparaison des schémas stats.
+
+**Symptôme** : certaines routes (`withDateRange`) acceptent `startAt+endAt` (epoch) **OU**
+`startDate+endDate` (date) ; d'autres (schéma zod brut : `events/series`, `sessions/stats`,
+`sessions/weekly`, `event-data/*`, `session-data/*`) exigent **`startAt`+`endAt`** seulement, parfois
+`timezone` requis. De plus, des GET déclarent `search` dans le handler sans l'avoir au schéma → le
+param est silencieusement ignoré.
+
+**Workaround** : ne pas généraliser un seul contrat de date ; mapper par endpoint (cf. table §4.3 de
+`API_UMAMI.md`). Calibrer en live.
+
+**Référence** : `docs/API_UMAMI.md` §2 (`@dateRange`) et §4.3.

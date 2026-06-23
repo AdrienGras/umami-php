@@ -10,7 +10,8 @@ Voir aussi : `ENVIRONMENT.md` · `QUIRKS.md` · `BACKLOG.md` · `HANDOFF.md` · 
 
 | Feature | Date | Spec | Plan | Statut | Notes |
 |---|---|---|---|---|---|
-| _(aucun Entrypoint livré — discovery du source pas encore faite, BOOTSTRAP étape 3)_ | | | | | |
+| **Discovery API Umami v3.1.0** | 2026-06-23 | `superpowers/specs/2026-06-23-contrat-lib.md` | — | ✅ livré | `docs/API_UMAMI.md` : 95 handlers cartographiés, 8 publics, 3 points sensibles, checklist 3.3 cochée. Reste `⚠ à vérifier (live)` (étape 4 docker). |
+| _(aucun Entrypoint/Request livré — implémentation à partir de BOOTSTRAP étape 5)_ | | | | | |
 
 > Les Entrypoints cibles (Tracking, Auth, Stats, Website, …) sont décrits dans
 > `superpowers/specs/2026-06-23-contrat-lib.md`. Ordre d'implémentation : BOOTSTRAP étape 7.
