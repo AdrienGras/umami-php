@@ -29,6 +29,8 @@ Tout passe par `parseRequest(request, schema?, options?)` (`src/lib/request.ts:1
   pour **non-GET**, il valide le **body JSON**. Échec → `400` avec `z.treeifyError(...)` (arbre
   d'erreurs zod, **pas** le format `{message,code,status}` standard).
 - **Réponses succès** : `Response.json(data)` (HTTP 200). Helper `ok()` → `{"ok":true}`.
+  Les listes paginées renvoient `{ data: [...], count, page, pageSize }` (✓ confirmé live étape 4
+  sur `GET /api/websites`).
 - **Réponses erreur** (`src/lib/response.ts`) : `{"error":{"message","code","status", ...}}` avec
   HTTP **400** (`bad-request`) / **401** (`unauthorized`) / **403** (`forbidden`) / **404** (`not-found`)
   / **500** (`server-error`).
@@ -65,7 +67,8 @@ Depuis `src/lib/constants.ts` et `src/lib/schema.ts` :
 ### Params communs (factorisés)
 
 - **`@dateRange`** (`withDateRange`, `schema.ts:16`) : au moins UNE paire requise — `startAt`+`endAt`
-  (number, epoch) **OU** `startDate`+`endDate` (date). Optionnels : `timezone` (IANA), `unit`, `compare`.
+  (number, epoch **ms** — ✓ confirmé live étape 4) **OU** `startDate`+`endDate` (date). Optionnels :
+  `timezone` (IANA), `unit`, `compare`.
 - **`@filters`** (`filterParams`, `schema.ts:45`) : tous optionnels — colonnes EVENT/SESSION en string,
   `segment`/`cohort` (uuid), `eventType` (int>0), `excludeBounce` (string), `match` (`all|any`).
 - **`@paging`** : `page` (int>0), `pageSize` (int>0). **`@search`** : `search` (string).
@@ -93,17 +96,19 @@ if (!process.env.DISABLE_BOT_CHECK && isbot(userAgent)) {
   return json({ beep: 'boop' });   // HTTP 200, body {"beep":"boop"}
 }
 ```
-→ **HTTP 200** avec body exactement `{"beep":"boop"}`. Signature confirmée. C'est le déclencheur de
-`BotFilteredException` côté lib (la `Response` custom doit inspecter le body, cf. CLAUDE.md règle 3).
-`isbot` se base sur le **User-Agent** → UA descriptif obligatoire côté serveur.
+→ **HTTP 200** avec body exactement `{"beep":"boop"}`. Signature confirmée — **✓ reproduit live
+étape 4** : UA `curl/*` → `{"beep":"boop"}` ET absent des stats ; UA navigateur → enregistré. C'est
+le déclencheur de `BotFilteredException` côté lib (la `Response` custom doit inspecter le body, cf.
+CLAUDE.md règle 3). `isbot` se base sur le **User-Agent** → UA descriptif obligatoire côté serveur.
 
 **identify (point sensible #2)** : `type === 'identify'` + `data` → `saveSessionData` avec
 `distinctId = payload.id` (`:272`). Le champ **`id`** rattache la session à un identifiant stable.
 
 **Cache token (point sensible #2)** : header **`x-umami-cache`** en entrée (JWT signé, `:104`) →
 évite le re-fetch website + recalcul session. **Réponse succès** (`:313`) :
-`{ "cache": <token>, "sessionId": <uuid>, "visitId": <uuid> }`. Le `cache` est à renvoyer comme
-header `x-umami-cache` aux appels suivants. Session expirée après 30 min d'inactivité (`:172`).
+`{ "cache": <token>, "sessionId": <uuid>, "visitId": <uuid> }` (✓ confirmé live étape 4). Le `cache`
+est à renvoyer comme header `x-umami-cache` aux appels suivants. Session expirée après 30 min
+d'inactivité (`:172`).
 
 **Autres issues** : IP bloquée → `403 forbidden()` (`:136`) ; website introuvable → `400` (`:119`) ;
 exception → `500`.
@@ -120,7 +125,8 @@ n'est enregistré** (cf. QUIRKS).
 
 Réf : `src/app/api/auth/login/route.ts`. **PUBLIC** (`skipAuth:true`). **Schéma body** :
 `{ username: string, password: string }`. **Succès** (`:44`) :
-`{ token, user: { id, username, role, createdAt, isAdmin, teams } }`. **Échec** : `401`
+`{ token, user: { id, username, role, createdAt, isAdmin, teams } }` (✓ confirmé live étape 4 :
+`token` + `user.{username,role,isAdmin}`). **Échec** : `401`
 `{error:{code:'incorrect-username-password', ...}}`. Le `token` alimente le Bearer (§1).
 
 ---

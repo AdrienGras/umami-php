@@ -22,3 +22,4 @@ Voir aussi : `ENVIRONMENT.md` · `QUIRKS.md` · `BACKLOG.md` · `HANDOFF.md` · 
 |---|---|---|
 | `bash scripts/check.sh` | 2026-06-23 | Porte de validation pré-commit (règle d'or 8) : composer validate/audit + cs-fixer + phpstan + phpunit unit |
 | `bash scripts/clone-references.sh` | 2026-06-23 | Clone gitignoré du source Umami `@v3.1.0` dans `reference/` (base de la discovery) |
+| `bash scripts/seed-umami.sh` | 2026-06-23 | Seed idempotent de l'instance docker de test : attend le login, crée/réutilise le website `umami-php-test`, (ré)écrit `.env.test` (BOOTSTRAP étape 4) |

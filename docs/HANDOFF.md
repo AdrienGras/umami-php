@@ -6,6 +6,44 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 
 ---
 
+## 2026-06-23 — Instance docker de test + seed + validation anti-200 (BOOTSTRAP étape 4)
+
+### Dernière chose faite
+- **Instance Umami de test UP** : `docker compose -f docker-compose.test.yml up -d` (image
+  `ghcr.io/umami-software/umami:3.1.0` + Postgres 16, port **3015**). Boot rapide (~quelques s).
+- **`scripts/seed-umami.sh` écrit et livré** (idempotent) : attend le **login** (readiness réelle —
+  le heartbeat ment, il répond 200 avant les migrations), réutilise/crée le website `umami-php-test`
+  (domain `umami-php.test`) via GET-avant-POST, (ré)écrit `.env.test`. Testé 2× : create puis réutilise
+  le même UUID. `.env.test` régénéré (l'ancien était un **résidu copié de dashi** : `dashi.test`).
+- **Dispositif anti-200-silencieux VALIDÉ live** : hit UA navigateur sur `/human` → `{cache,sessionId,
+  visitId}` + apparaît dans `metrics?type=path` (pageviews:1) ; hit UA `curl` sur `/bot` → `{"beep":
+  "boop"}` ET **absent** des stats. Comportement attendu (règles d'or 3 & 7).
+- **Confirmations live consignées dans `API_UMAMI.md`** (✓ étape 4) : `startAt/endAt` en epoch **ms**,
+  réponse `send` `{cache,sessionId,visitId}`, `beep/boop`, pagination `{data,count,page,pageSize}`,
+  login `{token,user{username,role,isAdmin}}`. Admin par défaut `admin`/`umami` (source
+  `scripts/seed/index.ts:129`).
+- **QUIRKS** : ajout du piège **rtk** (corrompt les commandes shell multi-lignes → passer par un `.sh`
+  dans le scratchpad) + note epoch ms (vs `timestamp` payload en secondes).
+
+### Trucs en suspens
+- Rien de cassé. La plupart des `⚠ à vérifier (live)` des domaines stats/event-data/session-data
+  **restent à lever** (formes de réponse non encore appelées en live) — se feront au fil de l'étape 7.
+- Pas encore commité : `scripts/seed-umami.sh` + mises à jour mémoire (ENVIRONMENT, INDEX, QUIRKS,
+  API_UMAMI, HANDOFF). Porte de validation `scripts/check.sh` à passer avant commit.
+
+### Prochaine chose à creuser
+- **BOOTSTRAP étape 5** : scaffold transport-only de la lib (`src/UmamiApi.php` Connector +
+  Entrypoints/Requests/Responses/Exceptions), puis **étape 7.1 Tracking** (`/api/send`, `/api/batch`)
+  en premier — c'est le domaine qui porte `beep/boop` (déjà validé live, factories testables d'emblée).
+
+### Notes pour future Claude
+- L'instance tourne déjà (ou `up -d` + `seed`). Pour repartir propre : `down -v` puis up + seed.
+- Website de test courant : voir `.env.test` (`UMAMI_TEST_WEBSITE_ID`). Credentials `admin`/`umami`.
+- Test live type : écrire le script dans le scratchpad et `bash` (cf. quirk rtk), jamais inliner un
+  gros bloc curl+jq.
+
+---
+
 ## 2026-06-23 — Discovery du source Umami (BOOTSTRAP étape 3)
 
 ### Dernière chose faite

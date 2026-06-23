@@ -119,6 +119,39 @@ cycle de vie. Pas de refresh non plus.
 
 **Référence** : `reference/umami/src/app/api/auth/logout/route.ts:5`.
 
+## `rtk` corrompt les commandes shell multi-lignes complexes (2026-06-23, étape 4)
+
+**Découvert** : tests de validation anti-200 (curl + jq + heredoc + arithmétique `$(())`).
+
+**Symptôme** : une commande bash multi-lignes passée au shell se fait mutiler à l'`eval`
+(`parse error near 'NOW=$(($() AppleWebK...'` — des fragments de lignes distinctes se
+retrouvent concaténés). Le shell hôte affiche aussi `[rtk] WARNING: untrusted project
+filters (.rtk/filters.toml) — Filters NOT applied`.
+
+**Cause** : l'intégration shell `rtk` (zsh) interfère avec l'évaluation des commandes
+composées (substitutions, parenthèses dans des strings UA, heredocs).
+
+**Workaround** : pour tout test non-trivial (plusieurs curl/jq, arithmétique, heredoc),
+**écrire un `.sh` dans le scratchpad et l'exécuter via `bash chemin/script.sh`** plutôt que
+d'inliner. Les commandes simples passent sans souci.
+
+**Référence** : `scratchpad/validate.sh` (étape 4).
+
+## `startAt`/`endAt` sont en epoch **millisecondes** (2026-06-23, confirmé live)
+
+**Découvert** : validation live des stats (étape 4).
+
+**Symptôme** : doute sur l'unité de `startAt`/`endAt` (s vs ms). Un appel `metrics`/`stats`
+avec `startAt`/`endAt` en **millisecondes** (`$(date +%s) * 1000`) renvoie bien les hits ;
+en secondes la fenêtre serait à côté.
+
+**Cause** : Umami v3 manipule les bornes de plage en epoch ms.
+
+**Workaround** : côté lib, exposer/convertir en ms pour les params `startAt`/`endAt`. (Le
+`timestamp` du payload `/api/send`, lui, reste en epoch **secondes** — ne pas confondre.)
+
+**Référence** : `docs/API_UMAMI.md` §2 (`@dateRange`).
+
 ## Deux contrats de date incohérents selon l'endpoint (2026-06-23, discovery)
 
 **Découvert** : comparaison des schémas stats.
