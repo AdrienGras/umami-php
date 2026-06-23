@@ -1,0 +1,23 @@
+# Registre des features livrées
+
+Catalogue chronologique de ce qui a été construit. Pour chaque entrée : spec (le quoi/pourquoi), plan (le comment), statut. Une ligne par feature.
+
+Voir aussi : `ENVIRONMENT.md` · `QUIRKS.md` · `BACKLOG.md` · `HANDOFF.md` · `superpowers/specs/` · `superpowers/plans/`
+
+---
+
+## Features
+
+| Feature | Date | Spec | Plan | Statut | Notes |
+|---|---|---|---|---|---|
+| _(aucun Entrypoint livré — discovery du source pas encore faite, BOOTSTRAP étape 3)_ | | | | | |
+
+> Les Entrypoints cibles (Tracking, Auth, Stats, Website, …) sont décrits dans
+> `superpowers/specs/2026-06-23-contrat-lib.md`. Ordre d'implémentation : BOOTSTRAP étape 7.
+
+## Commandes / scripts utilitaires
+
+| Commande | Date | Cible |
+|---|---|---|
+| `bash scripts/check.sh` | 2026-06-23 | Porte de validation pré-commit (règle d'or 8) : composer validate/audit + cs-fixer + phpstan + phpunit unit |
+| `bash scripts/clone-references.sh` | 2026-06-23 | Clone gitignoré du source Umami `@v3.1.0` dans `reference/` (base de la discovery) |

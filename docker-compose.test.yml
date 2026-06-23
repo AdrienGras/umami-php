@@ -1,0 +1,24 @@
+services:
+  umami-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: umami
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umami"]
+      interval: 5s
+      retries: 10
+
+  umami:
+    # Ère v3 : plus de préfixe postgresql- dans les tags (image unifiée, driver via DATABASE_URL).
+    image: ghcr.io/umami-software/umami:3.1.0
+    environment:
+      DATABASE_URL: postgresql://umami:umami@umami-db:5432/umami
+      APP_SECRET: dashi-test-secret-not-for-prod
+      # PAS de DISABLE_BOT_CHECK — le filtre actif fait partie du dispositif de test (règle d'or n°7).
+    ports:
+      - "3015:3000"
+    depends_on:
+      umami-db:
+        condition: service_healthy
