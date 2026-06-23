@@ -15,27 +15,24 @@ use Saloon\Http\PendingRequest;
 
 final class WebsiteEntrypointTest extends TestCase
 {
-    /** @return array{0: UmamiApi, 1: array<int, PendingRequest>}
+    /**
      * @param array<string, mixed> $responseBody
      */
-    private function apiCapturing(array $responseBody = []): array
+    private function apiCapturing(array $responseBody = []): UmamiApi
     {
-        $captured = [];
         $api = new UmamiApi(baseUrl: 'http://umami.test', apiToken: 'tok');
         $api->withMockClient(new MockClient([
-            function (PendingRequest $request) use (&$captured, $responseBody): MockResponse {
-                $captured[] = $request;
-
+            function (PendingRequest $request) use ($responseBody): MockResponse {
                 return MockResponse::make($responseBody, 200);
             },
         ]));
 
-        return [$api, &$captured];
+        return $api;
     }
 
     public function testCreateBuildsBodyOmittingNulls(): void
     {
-        [$api] = $this->apiCapturing(['id' => 'w1', 'name' => 'Site']);
+        $api = $this->apiCapturing(['id' => 'w1', 'name' => 'Site']);
 
         $result = $api->websites->create(name: 'Site', domain: 'example.com');
 
@@ -49,7 +46,7 @@ final class WebsiteEntrypointTest extends TestCase
 
     public function testCreateIncludesOptionalFields(): void
     {
-        [$api] = $this->apiCapturing();
+        $api = $this->apiCapturing();
 
         $api->websites->create(name: 'S', domain: 'd.com', shareId: 'sh', teamId: 't1', id: 'fixed');
 
@@ -64,7 +61,7 @@ final class WebsiteEntrypointTest extends TestCase
 
     public function testCreateRejectsEmptyName(): void
     {
-        [$api] = $this->apiCapturing();
+        $api = $this->apiCapturing();
 
         $this->expectException(InvalidArgumentException::class);
         $api->websites->create(name: '  ', domain: 'd.com');
@@ -72,7 +69,7 @@ final class WebsiteEntrypointTest extends TestCase
 
     public function testCreateRejectsTooLongDomain(): void
     {
-        [$api] = $this->apiCapturing();
+        $api = $this->apiCapturing();
 
         $this->expectException(InvalidArgumentException::class);
         $api->websites->create(name: 'S', domain: str_repeat('a', 501));
@@ -80,7 +77,7 @@ final class WebsiteEntrypointTest extends TestCase
 
     public function testUpdateSerializesReplayConfig(): void
     {
-        [$api] = $this->apiCapturing();
+        $api = $this->apiCapturing();
 
         $api->websites->update(
             id: 'w1',
@@ -105,7 +102,7 @@ final class WebsiteEntrypointTest extends TestCase
 
     public function testListBuildsQueryOmittingNulls(): void
     {
-        [$api] = $this->apiCapturing(['data' => [], 'count' => 0]);
+        $api = $this->apiCapturing(['data' => [], 'count' => 0]);
 
         $api->websites->list(page: 2, search: 'foo');
 
@@ -116,7 +113,7 @@ final class WebsiteEntrypointTest extends TestCase
 
     public function testGetRejectsEmptyId(): void
     {
-        [$api] = $this->apiCapturing();
+        $api = $this->apiCapturing();
 
         $this->expectException(InvalidArgumentException::class);
         $api->websites->get('  ');
@@ -124,7 +121,7 @@ final class WebsiteEntrypointTest extends TestCase
 
     public function testDeleteReturnsVoidAndHitsEndpoint(): void
     {
-        [$api] = $this->apiCapturing(['ok' => true]);
+        $api = $this->apiCapturing(['ok' => true]);
 
         $api->websites->delete('w1');
 
