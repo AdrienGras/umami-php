@@ -24,18 +24,24 @@ final class WebsiteRequestsTest extends TestCase
         self::assertSame(Method::GET, $this->method(new ListWebsites()));
 
         self::assertSame('/api/websites/abc', (new GetWebsite('abc'))->resolveEndpoint());
+        self::assertSame(Method::GET, $this->method(new GetWebsite('abc')));
 
         self::assertSame('/api/websites', (new CreateWebsite(['name' => 'x']))->resolveEndpoint());
         self::assertSame(Method::POST, $this->method(new CreateWebsite(['name' => 'x'])));
 
         self::assertSame('/api/websites/abc', (new UpdateWebsite('abc', ['name' => 'y']))->resolveEndpoint());
+        self::assertSame(Method::POST, $this->method(new UpdateWebsite('abc', ['name' => 'y'])));
         self::assertSame('/api/websites/abc', (new DeleteWebsite('abc'))->resolveEndpoint());
         self::assertSame(Method::DELETE, $this->method(new DeleteWebsite('abc')));
 
         self::assertSame('/api/websites/abc/reset', (new ResetWebsite('abc'))->resolveEndpoint());
+        self::assertSame(Method::POST, $this->method(new ResetWebsite('abc')));
         self::assertSame('/api/websites/abc/transfer', (new TransferWebsite('abc', ['userId' => 'u']))->resolveEndpoint());
+        self::assertSame(Method::POST, $this->method(new TransferWebsite('abc', ['userId' => 'u'])));
         self::assertSame('/api/websites/abc/daterange', (new GetWebsiteDateRange('abc'))->resolveEndpoint());
+        self::assertSame(Method::GET, $this->method(new GetWebsiteDateRange('abc')));
         self::assertSame('/api/websites/abc/values', (new GetWebsiteValues('abc'))->resolveEndpoint());
+        self::assertSame(Method::GET, $this->method(new GetWebsiteValues('abc')));
     }
 
     private function method(\Saloon\Http\Request $request): Method
