@@ -6,6 +6,48 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 
 ---
 
+## 2026-06-23 — Domaine Tracking (BOOTSTRAP étape 7.1)
+
+### Dernière chose faite
+- **Tracking livré en TDD** (17 tests unit + 3 intégration verts, porte verte). API publique
+  choisie avec Adrien : **value object `Payload` + raccourcis sémantiques**.
+  - `src/Tracking/Payload.php` — readonly, named args, ~22 champs (miroir du schéma `send`),
+    `toArray()` omet les nuls.
+  - `src/Enums/CollectionType.php` — `event`/`identify`/`performance`.
+  - `src/Requests/Tracking/SendHit.php` (`/api/send`) + `SendBatch.php` (`/api/batch`) —
+    `implements HasBody, SkipsAuth` ; payload nommé `$payload`/`$hits`. Batch = array JSON racine.
+  - `src/Entrypoints/TrackingEntrypoint.php` — `send(Payload,$type)`, `batch(Payload[],$type)`,
+    `pageview()`, `event()`, `identify()`. Gardes : exactement un de website/link/pixel ;
+    name/distinctId non vides ; batch non vide. Branché sur le Connector (`$umami->tracking`).
+  - Tests : `tests/Unit/Tracking/{Payload,TrackingEntrypoint}Test.php`, `tests/Unit/ConnectorTest.php`,
+    `tests/Integration/Tracking/TrackingIntegrationTest.php` + `IntegrationTestCase` (charge `.env.test`,
+    skip si absent, login + metrics via Requests anonymes ; poll `metrics?type=path`).
+- **Découverte majeure (QUIRK)** : le UA par défaut de la lib **est flagué bot** → tout hit sans
+  `payload.userAgent` est filtré. `userAgent` du payload **prime** sur le header (`lib/detect.ts:127`).
+  En tracking, relayer le UA du **visiteur**. Validé live (test négatif isbot → `BotFilteredException`
+  ET absent des stats).
+
+### Trucs en suspens
+- `AuthEntrypoint` pas encore là : le harnais d'intégration fait login/metrics via Requests
+  anonymes en attendant (à remplacer par `AuthEntrypoint`/`StatsEntrypoint` quand livrés).
+- `identify` : test d'intégration = smoke (200 accepté). Rattachement distinctId complet (via API
+  sessions) → à approfondir quand le domaine Sessions sera là (noter BACKLOG si besoin).
+- README quickstart tracking (note UA visiteur + try/catch BotFilteredException) → à écrire (étape doc).
+
+### Prochaine chose à creuser
+- **BOOTSTRAP étape 7.2 — Auth** : `AuthEntrypoint::login()/logout()/verify()`. `login` PUBLIC
+  (`{username,password}` → `{token,user}`), les autres Bearer. Une fois le token obtenu, le
+  Connector l'injecte déjà (middleware) sur les requêtes non-`SkipsAuth`. Puis **7.3 Stats**.
+
+### Notes pour future Claude
+- Lancer l'intégration : instance docker up + `bash scripts/seed-umami.sh`, puis
+  `vendor/bin/phpunit --testsuite integration`. Sans `.env.test`, la suite skip proprement.
+- Mock body en unit : `$response->getPendingRequest()->body()->all()` est `?BodyRepository`/`mixed`
+  → garder le null + `is_array` (phpstan max). `MockResponse::make($body,$status)`.
+- DX tracking : `$umami->tracking->pageview($id, url:'/x', userAgent:$visitorUa)`.
+
+---
+
 ## 2026-06-23 — Socle transport-only de la lib (BOOTSTRAP étape 5)
 
 ### Dernière chose faite

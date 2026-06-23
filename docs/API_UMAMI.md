@@ -100,6 +100,10 @@ if (!process.env.DISABLE_BOT_CHECK && isbot(userAgent)) {
 étape 4** : UA `curl/*` → `{"beep":"boop"}` ET absent des stats ; UA navigateur → enregistré. C'est
 le déclencheur de `BotFilteredException` côté lib (la `Response` custom doit inspecter le body, cf.
 CLAUDE.md règle 3). `isbot` se base sur le **User-Agent** → UA descriptif obligatoire côté serveur.
+**✓ vérifié (live)** : `getClientInfo` (`lib/detect.ts:127`) résout `userAgent = payload?.userAgent
+|| header('user-agent')` — le `userAgent` du **payload prime** sur le header. Un UA non-navigateur
+(dont le UA par défaut de la lib) → `isbot` → `beep/boop`. Donc en tracking, relayer le UA du
+**visiteur** via `payload.userAgent`. Réf `lib/detect.ts:127`.
 
 **identify (point sensible #2)** : `type === 'identify'` + `data` → `saveSessionData` avec
 `distinctId = payload.id` (`:272`). Le champ **`id`** rattache la session à un identifiant stable.

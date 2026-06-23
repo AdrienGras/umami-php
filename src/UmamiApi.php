@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AdrienGras\Umami;
 
 use AdrienGras\Umami\Contracts\SkipsAuth;
+use AdrienGras\Umami\Entrypoints\TrackingEntrypoint;
 use AdrienGras\Umami\Responses\UmamiApiResponse;
 use Saloon\Http\Connector;
 use Saloon\Http\PendingRequest;
@@ -25,11 +26,16 @@ class UmamiApi extends Connector
     /** @var class-string<\Saloon\Http\Response>|null */
     protected ?string $response = UmamiApiResponse::class;
 
+    /** Tracking façade: `/api/send`, `/api/batch`. */
+    public readonly TrackingEntrypoint $tracking;
+
     public function __construct(
         public readonly string $baseUrl,
         public readonly ?string $apiToken = null,
         public readonly bool $useDebug = false,
     ) {
+        $this->tracking = new TrackingEntrypoint($this);
+
         if ($this->useDebug) {
             $this->debug();
         }

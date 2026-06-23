@@ -119,6 +119,26 @@ cycle de vie. Pas de refresh non plus.
 
 **Référence** : `reference/umami/src/app/api/auth/logout/route.ts:5`.
 
+## Le User-Agent par défaut de la lib est flagué bot par Umami (2026-06-23, étape 7.1)
+
+**Découvert** : test live d'un hit `/api/send` avec le UA du Connector
+(`umami-php/1.0 (+https://github.com/AdrienGras/umami-php)`).
+
+**Symptôme** : ce UA déclenche `isbot()` → **HTTP 200 `{"beep":"boop"}`** → le hit est filtré.
+Donc tout `send`/`batch` qui ne fournit PAS de `userAgent` retombe sur le UA du Connector et est
+**silencieusement filtré** (→ `BotFilteredException` côté lib).
+
+**Cause** : `getClientInfo` (`lib/detect.ts:127`) résout `userAgent = payload?.userAgent ||
+header('user-agent')`. Le UA du visiteur (payload) **prime** sur le header ; à défaut, le header
+(UA lib) passe à `isbot`, qui rejette tout UA non-navigateur.
+
+**Workaround / contrat** : en tracking serveur, **toujours relayer le vrai UA du visiteur** via
+`Payload(userAgent: ...)` (ou les raccourcis `pageview/event/identify(..., userAgent: ...)`).
+C'est un fail-safe sain (un hit sans UA visiteur EST suspect) mais à documenter dans le README.
+Le UA du Connector ne sert que d'identité HTTP de la lib, jamais d'identité de tracking.
+
+**Référence** : `reference/umami/src/lib/detect.ts:127` ; `src/Tracking/Payload.php` (phpdoc).
+
 ## Saloon v4 : `throw()` consulte `failed()`, pas `toException()` (2026-06-23, étape 5)
 
 **Découvert** : lecture de `vendor/saloonphp/saloon/src/Http/Response.php` + `Traits/ManagesExceptions.php`.

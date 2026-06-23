@@ -129,6 +129,19 @@ if (null !== $this->apiToken) {
 
 `baseUrl` **requis** (pas de défaut bidon — PHP pur, instanciation explicite). `$response = UmamiApiResponse::class`.
 
+## Entrypoint — entrée par value object + raccourcis (décision projet)
+
+Pour un endpoint à payload riche (≥ ~6 champs), l'Entrypoint expose :
+- un **value object readonly** d'entrée (`Tracking/Payload`) à named args, tous champs optionnels,
+  `toArray()` qui **omet les nuls** (transport) — les gardes/règles ne vivent PAS dans le VO ;
+- une méthode bas niveau (`send(Payload, ...)`) + des **raccourcis sémantiques**
+  (`pageview/event/identify`) qui construisent le VO et délèguent ;
+- les **gardes** (exactement un de X/Y/Z, champs requis non vides, trim) dans l'Entrypoint,
+  avant l'envoi, levant `\InvalidArgumentException`.
+
+Request `implements HasBody, SkipsAuth` pour le tracking ; le payload prêt est passé tel quel
+(`SendHit($type, $payload)`). Body array racine pour les endpoints « tableau » (`SendBatch`).
+
 ## Tests unitaires — mock Saloon v4
 
 `MockResponse::make($body, $status, $headers)` (body array → JSON). `$api->withMockClient(new MockClient([$mock]))`.

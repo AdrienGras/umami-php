@@ -12,7 +12,8 @@ Voir aussi : `ENVIRONMENT.md` · `QUIRKS.md` · `BACKLOG.md` · `HANDOFF.md` · 
 |---|---|---|---|---|---|
 | **Discovery API Umami v3.1.0** | 2026-06-23 | `superpowers/specs/2026-06-23-contrat-lib.md` | — | ✅ livré | `docs/API_UMAMI.md` : 95 handlers cartographiés, 8 publics, 3 points sensibles, checklist 3.3 cochée. Reste `⚠ à vérifier (live)` (étape 4 docker). |
 | **Socle transport-only** (BOOTSTRAP étape 5) | 2026-06-23 | `superpowers/specs/2026-06-23-contrat-lib.md` | — | ✅ livré | `UmamiApi` (Connector : AlwaysThrowOnErrors+AcceptsJson, `$response` custom, Bearer hors `SkipsAuth`, UA), `UmamiApiResponse` (requalif `beep/boop`→`BotFilteredException`, mapping v4 `failed()`+`createException()`), `UmamiApiException`+`BotFilteredException`, `AbstractEntrypoint`, interface `SkipsAuth`. **5 tests unit verts** (mapping erreur + régime auth). |
-| _(Entrypoints métier — Tracking en premier, BOOTSTRAP étape 7.1)_ | | | | | |
+| **Tracking** (BOOTSTRAP étape 7.1) | 2026-06-23 | `superpowers/specs/2026-06-23-contrat-lib.md` | — | ✅ livré | `TrackingEntrypoint` (`$umami->tracking`) : `send(Payload, type)`, `batch(Payload[], type)`, raccourcis `pageview/event/identify`. Value object `Payload` (toArray omet nuls), enum `CollectionType`, Requests `SendHit`/`SendBatch` (`SkipsAuth`). Gardes : exactement un de website/link/pixel, name/distinctId non vides. **17 tests unit + 3 intégration** (hit réel, isbot→BotFiltered ET absent, identify). |
+| _(prochain : Auth — login/logout/verify, BOOTSTRAP étape 7.2)_ | | | | | |
 
 > Les Entrypoints cibles (Tracking, Auth, Stats, Website, …) sont décrits dans
 > `superpowers/specs/2026-06-23-contrat-lib.md`. Ordre d'implémentation : BOOTSTRAP étape 7.
