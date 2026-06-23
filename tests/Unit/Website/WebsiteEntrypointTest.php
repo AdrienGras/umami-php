@@ -165,6 +165,7 @@ final class WebsiteEntrypointTest extends TestCase
         self::assertInstanceOf(PendingRequest::class, $pending);
         $body = $pending->body();
         self::assertSame(['teamId' => 't1'], null === $body ? [] : $body->all());
+        self::assertSame('/api/websites/w1/transfer', $pending->getRequest()->resolveEndpoint());
     }
 
     public function testTransferRejectsNoTarget(): void
@@ -210,6 +211,19 @@ final class WebsiteEntrypointTest extends TestCase
         self::assertSame(1000, $query['startAt']);
         self::assertSame(2000, $query['endAt']);
         self::assertSame('/api/websites/w1/values', $pending->getRequest()->resolveEndpoint());
+    }
+
+    public function testValuesOmitsNullSearch(): void
+    {
+        $api = $this->apiCapturing([['value' => '/home'], ['value' => '/about']]);
+
+        $api->websites->values('w1', 'path', Period::between(1000, 2000));
+
+        $pending = $api->getMockClient()?->getLastPendingRequest();
+        self::assertInstanceOf(PendingRequest::class, $pending);
+        $query = $pending->query()->all();
+        self::assertArrayNotHasKey('search', $query);
+        self::assertSame('path', $query['type']);
     }
 
     public function testValuesRejectsEmptyType(): void
