@@ -57,7 +57,7 @@ final class WebsiteIntegrationTest extends IntegrationTestCase
         $ids = array_column($data, 'id');
         self::assertContains($id, $ids, 'Created website must appear in list()');
 
-        // Reset — wipes analytics data, returns nothing (no exception = success)
+        // Reset — wipes analytics data, returns nothing. reset() returns void — no exception is the success signal.
         $api->websites->reset($id);
 
         // Delete — no exception = success
@@ -76,7 +76,7 @@ final class WebsiteIntegrationTest extends IntegrationTestCase
      * dateRange on the seeded website returns an array with date keys.
      *
      * Uses a wide Period window (±30 days) so the seeded website's data is in range.
-     * The real shape is recorded: {mindate, maxdate} — lifted ⚠ live marker.
+     * Real live shape: {startDate: ISO-string, endDate: ISO-string} (API_UMAMI.md initially documented {mindate,maxdate} — corrected at étape 7.4).
      */
     public function testDateRangeOnSeededWebsite(): void
     {
@@ -119,6 +119,8 @@ final class WebsiteIntegrationTest extends IntegrationTestCase
 
     /**
      * values() with 'path' field type also works (EVENT_COLUMNS member).
+     *
+     * Smoke test: verifies the 'path' type is accepted (no 400/404). Item shape is validated in testValuesOnSeededWebsite.
      */
     public function testValuesForPathType(): void
     {
