@@ -13,6 +13,7 @@ Une fois faite, déplace-la en `INDEX.md` (livré) ou supprime-la (abandonnée).
 
 ## Tooling / qualité
 
+- [ ] **Durcir `UmamiApiResponse` contre les réponses 200 + body `null`** : un GET sur une ressource supprimée (ex. website) renvoie HTTP 200 avec body `null` → Saloon lève un `TypeError` brut (assignation de `null` à `array $decodedJson`) au lieu d'un `UmamiApiException`. Aucun 200 d'Umami ne devrait s'échapper en `TypeError` PHP. Option : requalifier 200+null en `UmamiApiException` ou retourner `[]` dans la Response custom. Découvert à l'étape 7.4 (cf. QUIRKS.md).
 - [ ] Câbler `scripts/check.sh` en **git pre-commit hook** réel (`.git/hooks/pre-commit`) pour
   forcer la porte automatiquement, pas seulement par discipline.
 - [ ] CI (GitHub Actions) rejouant la porte de validation + intégration docker.

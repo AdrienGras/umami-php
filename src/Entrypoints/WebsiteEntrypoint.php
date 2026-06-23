@@ -155,7 +155,7 @@ readonly class WebsiteEntrypoint extends AbstractEntrypoint
     }
 
     /**
-     * Date span of the website's data (`{mindate, maxdate}`).
+     * Date span of the website's data (`{startDate, endDate}`).
      *
      * @return array<string, mixed>
      */
@@ -166,7 +166,7 @@ readonly class WebsiteEntrypoint extends AbstractEntrypoint
 
     /**
      * Distinct values for a field (`type` ∈ EVENT_COLUMNS ∪ SESSION_COLUMNS),
-     * over a period. Returns a list of `{value}` entries.
+     * over a period. Returns a list of `{value, count}` entries.
      *
      * @return list<array<string, mixed>>
      */
