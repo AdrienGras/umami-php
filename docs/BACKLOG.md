@@ -21,8 +21,20 @@ Une fois faite, déplace-la en `INDEX.md` (livré) ou supprime-la (abandonnée).
 
 ## Domaines API (selon arbitrage — cf. spec contrat)
 
-- [ ] **`WebsiteEntrypoint`** (CRUD `/api/websites` + `/[id]`) : prochain domaine logique (étape 7.4).
+- [x] **`WebsiteEntrypoint`** ✅ livré (étape 7.4) : CRUD (`list/get/create/update/delete`) +
+  sous-routes (`reset/transfer/dateRange/values`), 17 tests unit + 4 intégration.
 - [ ] `UserEntrypoint` / `TeamEntrypoint` / `ReportEntrypoint` : candidats BACKLOG si hors usage immédiat.
+
+## Sous-routes Website non couvertes (étape 7.4 — déféré)
+
+- [ ] `GET /api/websites/[id]/active` — visiteurs actifs (couvert indirectement via `StatsEntrypoint::active()`).
+- [ ] `GET /api/realtime/[id]` — fenêtre 30 min, pas de schéma de query.
+- [ ] `GET POST /api/websites/[id]/shares` + `POST GET POST DELETE /api/share*` — partage par slug.
+- [ ] `GET /api/websites/[id]/export` — réponse `{"zip":"<base64>"}` (cf. découverte export BACKLOG).
+- [ ] `GET POST DELETE /api/websites/[id]/segments` — segmentation.
+- [ ] `GET POST /api/websites/[id]/event-data/*` — données événements custom.
+- [ ] `GET /api/websites/[id]/session-data/*` — données session.
+- [ ] `GET /api/websites/[id]/revenue` — revenus.
 
 ## Reste à faire sur les domaines livrés (Tracking / Auth / Stats)
 

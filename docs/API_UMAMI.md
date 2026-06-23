@@ -220,22 +220,27 @@ Réf : `src/app/api/auth/login/route.ts`. **PUBLIC** (`skipAuth:true`). **Schém
   `shareId`(≤50 nullable, `null`→supprime shares), `replayEnabled`(bool), `replayConfig`
   (`{sampleRate 0..1, maskLevel strict|moderate, maxDuration int>0, blockSelector}`). DELETE →
   `{ok:true}`. `400 "That share ID is already taken."`. Réf `websites/[websiteId]/route.ts:16/37/106`.
+  ✓ (live, étape 7.4) — QUIRK : GET sur un id supprimé retourne HTTP **200 + body `null`** (pas 404).
+  Saloon lève `TypeError` (JSON `null` → `array $decodedJson`). À gérer côté appelant si besoin.
 
 #### `POST /api/websites/[websiteId]/reset`
 - Auth Bearer + `canUpdateWebsite`. Efface les données analytiques. Réponse `{ok:true}`. Réf
-  `websites/[websiteId]/reset/route.ts:6`.
+  `websites/[websiteId]/reset/route.ts:6`. ✓ (live, étape 7.4) — confirmé : reset() retourne void
+  sans exception.
 
 #### `POST /api/websites/[websiteId]/transfer`
 - Auth Bearer. Body : `userId` (uuid opt) OU `teamId` (uuid opt) — l'un requis sinon `400`. Réf
-  `websites/[websiteId]/transfer/route.ts:7`.
+  `websites/[websiteId]/transfer/route.ts:7`. ✓ (live, étape 7.4) — guard exactly-one confirmé.
 
 #### `GET /api/websites/[websiteId]/daterange`
-- Auth Bearer + `canViewWebsite`. Réponse : plage de dates des données (`{mindate, maxdate}` ⚠ live).
-  Réf `websites/[websiteId]/daterange/route.ts:6`.
+- Auth Bearer + `canViewWebsite`. Réponse : plage de dates des données. ✓ (live, étape 7.4)
+  **Forme réelle** : `{startDate: ISO-string, endDate: ISO-string}` (≠ `{mindate,maxdate}` documenté
+  initialement — corrigé). Réf `websites/[websiteId]/daterange/route.ts:6`.
 
 #### `GET /api/websites/[websiteId]/values`
-- Auth Bearer. Query `@dateRange` + `type` (requis, `fieldsParam`) + `search` (opt). Réponse :
-  `[{value}]` distinctes. Réf `websites/[websiteId]/values/route.ts:9`.
+- Auth Bearer. Query `@dateRange` + `type` (requis, `fieldsParam`) + `search` (opt). ✓ (live, étape 7.4)
+  **Forme réelle** : `[{value: string, count: int}]` (la doc mentionnait `[{value}]` seulement — `count`
+  est aussi présent). Réf `websites/[websiteId]/values/route.ts:9`.
 
 #### `GET /api/websites/[websiteId]/active`
 - Auth Bearer + `canViewWebsite`. Réponse : visiteurs actifs (`[{visitors}]` ⚠ live). Réf

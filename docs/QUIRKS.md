@@ -223,3 +223,20 @@ param est silencieusement ignoré.
 `API_UMAMI.md`). Calibrer en live.
 
 **Référence** : `docs/API_UMAMI.md` §2 (`@dateRange`) et §4.3.
+
+## GET sur un website supprimé → HTTP 200 + body `null` (2026-06-23, étape 7.4)
+
+**Découvert** : test d'intégration CRUD après `delete()`.
+
+**Symptôme** : `GET /api/websites/{id}` sur un id supprimé retourne **HTTP 200 avec body `null`**
+(pas une 404). Saloon appelle `json()` → `json_decode('null', true)` = `null` → `TypeError`
+(`Cannot assign null to property … $decodedJson of type array`).
+
+**Cause** : le handler Umami ne vérifie pas l'existence et retourne directement le résultat de la
+requête DB (null si non trouvé) sans lever de 404.
+
+**Workaround** : ne pas tester l'absence d'un website via `get()` après `delete()`. À la place,
+vérifier via `list()` que l'id est absent de `data[]`. Si on veut gérer ce cas côté lib, il faudrait
+intercepter le body `null` dans `UmamiApiResponse::failed()` — pas encore implémenté.
+
+**Référence** : `tests/Integration/Website/WebsiteIntegrationTest.php`, `API_UMAMI.md` §4.2.

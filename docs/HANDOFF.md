@@ -6,6 +6,37 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 
 ---
 
+## 2026-06-23 — Domaine Websites (BOOTSTRAP étape 7.4)
+
+### Dernière chose faite
+- **Websites entièrement livré** (17 tests unit + 4 intégration verts, porte verte).
+  - `src/Entrypoints/WebsiteEntrypoint.php` (`$umami->websites`) : `list/get/create/update/delete` (CRUD)
+    + `reset/transfer/dateRange/values` (sous-routes). Enum `MaskLevel`, VO `ReplayConfig`.
+  - 9 Requests Saloon (`src/Requests/Website/`). Guards `nonEmpty`/longueur/exactly-one.
+  - Tests intégration cycle CRUD live (commits : Task 3 `c944f51`, Task 4 `021881a`, Task 5 voir dernier commit).
+  - **Formes live confirmées** : `dateRange` → `{startDate, endDate}` (ISO-string, ≠ doc initiale `{mindate,maxdate}`) ;
+    `values` → `[{value: string, count: int}]` (doc disait `[{value}]` seulement).
+  - **Quirk découvert** : GET sur id supprimé → HTTP 200 + body `null` → `TypeError` Saloon (pas `UmamiApiException`).
+    Consigné dans `API_UMAMI.md` §4.2 et `QUIRKS.md`.
+- Mémoire consolidée : `INDEX.md` (une ligne Websites), `API_UMAMI.md` §4.2 (`⚠` levés), `BACKLOG.md`,
+  `HANDOFF.md` (entrées Task 3/Task 4 fusionnées ici).
+
+### Trucs en suspens
+- Sous-routes Website non couvertes : `active` (via Stats), `realtime`, `shares`, `export`,
+  `segments`, `event-data/*`, `session-data/*`, `revenue` → BACKLOG.
+- README quickstart toujours à écrire.
+
+### Prochaine chose à creuser
+- **BOOTSTRAP étape 7.5** : `UserEntrypoint` / `TeamEntrypoint` / `ReportEntrypoint` — ou README quickstart
+  selon priorité avec Adrien (cf. `BACKLOG.md`).
+
+### Notes pour future Claude
+- `Period::between(int $startAt, int $endAt)` → clés `startAt`/`endAt` en epoch ms via `toQuery()`.
+- GET sur id supprimé : HTTP 200 + `null` body → `TypeError` (pas notre exception). Contourner via `list()`.
+- `transfer` guard : `$hasUser === $hasTeam` → throw (0 ou 2 → false===false ou true===true).
+
+---
+
 ## 2026-06-23 — 🏁 Récap de session (étapes 4 → 7.3)
 
 **Grosse session.** Partie d'un bootstrap discovery-only, on a livré l'infra de test + 3 domaines
