@@ -4,6 +4,25 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-06-24
+
+First stable release. The public API is now considered stable and follows semantic versioning —
+no breaking changes without a major bump.
+
+### Added
+
+- **Realtime**: `$umami->stats->realtime($websiteId)` — the realtime activity window
+  (`/api/realtime/{id}`).
+- **Event-data** (`$umami->eventData`): explore custom-event properties —
+  `list`/`get`/`events`/`fields`/`properties`/`values`/`stats`. Reuses the `Period` (epoch
+  milliseconds) and `Filters` value objects.
+
+### Notes
+
+- The library now covers the full Umami v3.1.0 API surface that this package targets
+  (tracking, auth, stats, websites, users, teams, reports, realtime, event-data).
+- `eventData->events()` requires the `event` argument (the live endpoint returns `500` without it).
+
 ## [0.2.0] - 2026-06-24
 
 ### Added

@@ -10,6 +10,7 @@ use AdrienGras\Umami\Requests\Stats\GetActiveVisitors;
 use AdrienGras\Umami\Requests\Stats\GetEvents;
 use AdrienGras\Umami\Requests\Stats\GetMetrics;
 use AdrienGras\Umami\Requests\Stats\GetPageviews;
+use AdrienGras\Umami\Requests\Stats\GetRealtime;
 use AdrienGras\Umami\Requests\Stats\GetSessions;
 use AdrienGras\Umami\Requests\Stats\GetStats;
 use AdrienGras\Umami\Stats\Filters;
@@ -128,6 +129,17 @@ readonly class StatsEntrypoint extends AbstractEntrypoint
     public function active(string $websiteId): array
     {
         return $this->asList($this->api->send(new GetActiveVisitors($this->website($websiteId)))->json());
+    }
+
+    /**
+     * Realtime activity (served by the dedicated `/api/realtime/{id}` route).
+     * Returns `{countries, urls, referrers, events, series, totals, timestamp}`.
+     *
+     * @return array<string, mixed>
+     */
+    public function realtime(string $websiteId): array
+    {
+        return $this->asObject($this->api->send(new GetRealtime($this->website($websiteId)))->json());
     }
 
     private function website(string $websiteId): string

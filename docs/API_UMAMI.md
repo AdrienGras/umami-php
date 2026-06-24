@@ -257,9 +257,10 @@ Réf : `src/app/api/auth/login/route.ts`. **PUBLIC** (`skipAuth:true`). **Schém
 - Auth Bearer + `canViewWebsite`. Réponse : visiteurs actifs (`[{visitors}]` ⚠ live). Réf
   `websites/[websiteId]/active/route.ts:6`.
 
-#### `GET /api/realtime/[websiteId]`
+#### `GET /api/realtime/[websiteId]` — ✅ vérifié live (1.0, `StatsEntrypoint::realtime`)
 - Auth Bearer + `canViewWebsite`. Pas de schéma (query = filtres libres). Fenêtre serveur = 30 min.
   Réf `realtime/[websiteId]/route.ts:8`.
+- Live : `{countries, urls, referrers, events:[], series:{views,visitors}, totals:{views,visitors,events,countries}, timestamp}`.
 
 #### `GET /api/admin/websites` · `GET /api/me/websites`
 - Auth Bearer (`canViewAllWebsites` pour admin). Query `@paging` (+`search` admin ; `includeTeams` me).
@@ -294,13 +295,13 @@ Réf : `src/app/api/auth/login/route.ts`. **PUBLIC** (`skipAuth:true`). **Schém
 | `…/sessions/[sessionId]/activity` | `startAt,endAt` **requis** | activité chronologique ⚠ live | `…/activity:7` |
 | `…/sessions/[sessionId]/properties` | aucun schéma | `[{…}]` propriétés ⚠ live | `…/properties:6` |
 | `…/sessions/[sessionId]/replays` | `@dateRange,@paging,@search` (pas `@filters`) | liste replays ⚠ live | `…/replays:7` |
-| `…/event-data` | `startAt,endAt` **requis** + `@filters,@paging` | `{data:[{websiteId,eventId,eventName,eventProperties:[…]}], count, page, pageSize}` | `event-data:8` |
-| `…/event-data/events` | `startAt,endAt` **requis** + `event?,@filters` | events + compteurs props ⚠ live | `event-data/events:8` |
-| `…/event-data/fields` | `startAt,endAt` **requis** + `@filters` | `[{eventName,propertyName,dataType,…}]` ⚠ live | `event-data/fields:8` |
-| `…/event-data/properties` | `startAt,endAt` **requis** + `@filters` | props agrégées ⚠ live | `event-data/properties:8` |
-| `…/event-data/stats` | `startAt,endAt` **requis** + `@filters` | `{events, properties, records}` ⚠ live | `event-data/stats:8` |
-| `…/event-data/values` | `startAt,endAt,event,propertyName` **requis** + `@filters` | `[{value, total}]` ⚠ live | `event-data/values:8` |
-| `…/event-data/[eventId]` | aucun schéma | détail ⚠ live | `event-data/[eventId]:6` |
+| `…/event-data` ✅ | `startAt,endAt` **requis** + `@filters,@paging` | `{data:[{websiteId,eventId,eventName,eventProperties:[{dataKey,stringValue,numberValue,dateValue,dataType,createdAt}]}], count, page, pageSize}` | `event-data:8` |
+| `…/event-data/events` ✅ | `startAt,endAt` **requis** + `event` **(de-facto requis : 500 sinon, cf. QUIRKS)**, `@filters` | `[{eventName,propertyName,dataType,propertyValue,total}]` | `event-data/events:8` |
+| `…/event-data/fields` ✅ | `startAt,endAt` **requis** + `@filters` | liste | `event-data/fields:8` |
+| `…/event-data/properties` ✅ | `startAt,endAt` **requis** + `@filters` | `[{eventName,propertyName,total}]` | `event-data/properties:8` |
+| `…/event-data/stats` ✅ | `startAt,endAt` **requis** + `@filters` | `{events, properties, records}` | `event-data/stats:8` |
+| `…/event-data/values` ✅ | `startAt,endAt,event,propertyName` **requis** + `@filters` | `[{value, total}]` | `event-data/values:8` |
+| `…/event-data/[eventId]` ✅ | aucun schéma | détail event | `event-data/[eventId]:6` |
 | `…/session-data/properties` | `startAt,endAt` **requis** + `@filters` | props session ⚠ live | `session-data/properties:8` |
 | `…/session-data/values` | `startAt,endAt` **requis** + `propertyName?,@filters` | `[{value, total}]` ⚠ live | `session-data/values:8` |
 

@@ -6,6 +6,7 @@ namespace AdrienGras\Umami;
 
 use AdrienGras\Umami\Contracts\SkipsAuth;
 use AdrienGras\Umami\Entrypoints\AuthEntrypoint;
+use AdrienGras\Umami\Entrypoints\EventDataEntrypoint;
 use AdrienGras\Umami\Entrypoints\ReportEntrypoint;
 use AdrienGras\Umami\Entrypoints\StatsEntrypoint;
 use AdrienGras\Umami\Entrypoints\TeamEntrypoint;
@@ -53,6 +54,9 @@ class UmamiApi extends Connector
     /** Report façade: saved-report CRUD + nine generation endpoints. */
     public readonly ReportEntrypoint $reports;
 
+    /** Event-data façade: custom-event property exploration. */
+    public readonly EventDataEntrypoint $eventData;
+
     /**
      * Current reporting Bearer token. Seeded from $apiToken, then updated by
      * {@see withToken()} (e.g. after AuthEntrypoint::login()).
@@ -72,6 +76,7 @@ class UmamiApi extends Connector
         $this->users = new UserEntrypoint($this);
         $this->teams = new TeamEntrypoint($this);
         $this->reports = new ReportEntrypoint($this);
+        $this->eventData = new EventDataEntrypoint($this);
 
         if ($this->useDebug) {
             $this->debug();

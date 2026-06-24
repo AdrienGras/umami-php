@@ -6,6 +6,33 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 
 ---
 
+## 2026-06-24 — Realtime + Event-data (vers la 1.0)
+
+### Dernière chose faite
+- **Realtime** : `$umami->stats->realtime($websiteId)` (route dédiée `/api/realtime/{id}`, Request
+  `GetRealtime` standalone — pas `AbstractStatRequest` car path différent).
+- **Event-data** : nouvel **`$umami->eventData`** (`EventDataEntrypoint`) — `list/get/events/fields/
+  properties/values/stats`. Request base `AbstractEventDataRequest` (factorisée par `path()`, comme
+  `AbstractStatRequest`). Réutilise `Period` (epoch ms — ces routes exigent `startAt/endAt` int) + `Filters`.
+- **Quirk live** (QUIRKS) : `event-data/events` → **500 sans `event`** → `events()` rend `event` requis.
+- **13 tests unit + 2 intégration** verts (realtime + cycle event-data : event enregistré via tracking,
+  poll jusqu'à indexation, puis tous les endpoints). Porte verte (137 unit).
+- Mémoire : INDEX, API_UMAMI (✅ realtime + event-data, ⚠ levés), QUIRKS, BACKLOG, CHANGELOG (**1.0.0**), ce HANDOFF.
+
+### Trucs en suspens — RELEASE 1.0
+- **Tag `v1.0.0` à pousser** (CHANGELOG prêt, marque l'API stable / SemVer). Même procédure : attendre CI verte
+  sur le commit, tag annoté + GitHub Release, le hook Packagist synchronise. **Confirmer l'intention 1.0 avec Adrien
+  avant le tag** (engagement de stabilité).
+- Sous-routes encore déférées (BACKLOG) : shares, export, segments, session-data, revenue/sessions,
+  team boards/links/pixels, websites/[id]/reports.
+
+### Notes pour future Claude
+- `AbstractEventDataRequest` : pour ajouter une sous-route event-data, sous-classe + `path()`. Même pattern
+  que `AbstractStatRequest` (segment).
+- Ces endpoints veulent `Period::between` (epoch ms), pas `betweenDates` (le serveur attend `startAt/endAt` int).
+
+---
+
 ## 2026-06-24 — Domaine Reports (BOOTSTRAP étape 7.7) — DERNIER GROS DOMAINE
 
 ### Dernière chose faite

@@ -51,11 +51,11 @@ Une fois faite, déplace-la en `INDEX.md` (livré) ou supprime-la (abandonnée).
 ## Sous-routes Website non couvertes (étape 7.4 — déféré)
 
 - [ ] `GET /api/websites/[id]/active` — visiteurs actifs (couvert indirectement via `StatsEntrypoint::active()`).
-- [ ] `GET /api/realtime/[id]` — fenêtre 30 min, pas de schéma de query.
+- [x] `GET /api/realtime/[id]` ✅ livré (1.0) — `StatsEntrypoint::realtime()`.
 - [ ] `GET POST /api/websites/[id]/shares` + `POST GET POST DELETE /api/share*` — partage par slug.
 - [ ] `GET /api/websites/[id]/export` — réponse `{"zip":"<base64>"}` (cf. découverte export BACKLOG).
 - [ ] `GET POST DELETE /api/websites/[id]/segments` — segmentation.
-- [ ] `GET POST /api/websites/[id]/event-data/*` — données événements custom.
+- [x] `GET /api/websites/[id]/event-data/*` ✅ livré (1.0) — `EventDataEntrypoint` (7 endpoints).
 - [ ] `GET /api/websites/[id]/session-data/*` — données session.
 - [ ] `GET /api/websites/[id]/revenue` — revenus.
 

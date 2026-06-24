@@ -10,6 +10,22 @@ Comportements non-évidents découverts au fil du projet. Un H2 par quirk, avec 
 
 ---
 
+## `event-data/events` renvoie 500 sans le param `event` (2026-06-24)
+
+**Découvert** : sondage live des endpoints event-data (étape 1.0).
+
+**Symptôme** : `GET /api/websites/{id}/event-data/events?startAt=&endAt=` (sans `event`) →
+**HTTP 500** (même avec des données). Avec `&event=<nom>` → `200` + `[{eventName, propertyName,
+dataType, propertyValue, total}]`.
+
+**Cause** : le schéma zod marque `event` comme **optional**, mais la requête SQL sous-jacente plante
+sans. Le live est plus strict que le schéma (règle d'or n°6).
+
+**Workaround** : `EventDataEntrypoint::events()` rend `$event` **requis** (paramètre obligatoire,
+gardé non vide) — l'appelant ne peut pas déclencher le 500.
+
+**Référence** : `src/Entrypoints/EventDataEntrypoint.php::events`, `event-data/events/route.ts`.
+
 ## Reports : `filters` requis comme objet + réponses de génération de forme variable (2026-06-24)
 
 **Découvert** : implémentation `ReportEntrypoint` (étape 7.7), sondage live des 9 endpoints de génération.

@@ -101,6 +101,20 @@ $summary  = $umami->stats->stats($websiteId, $period);
 $topPaths = $umami->stats->metrics($websiteId, MetricType::Path, $period);
 $series   = $umami->stats->pageviews($websiteId, $period);
 $active   = $umami->stats->active($websiteId);
+$realtime = $umami->stats->realtime($websiteId); // current activity window
+```
+
+### Event data
+
+Explore custom-event properties (all windows are epoch-millisecond `Period`s):
+
+```php
+$period = Period::between(startAt: 1_700_000_000_000, endAt: 1_700_086_400_000);
+
+$records = $umami->eventData->list($websiteId, $period);
+$props   = $umami->eventData->properties($websiteId, $period);
+$rows    = $umami->eventData->events($websiteId, $period, 'signup'); // event name is required
+$values  = $umami->eventData->values($websiteId, $period, 'signup', 'plan');
 ```
 
 ### Websites
