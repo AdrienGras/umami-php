@@ -1,5 +1,11 @@
 parameters:
     level: max
+    # Analyse across the whole supported range (composer require: php ^8.2) so the
+    # local gate flags features newer than the floor — e.g. typed class constants
+    # (8.3+) that a 8.5 dev box would silently accept. Caught a real CI break.
+    phpVersion:
+        min: 80200
+        max: 80500
     paths:
         - src
         - tests

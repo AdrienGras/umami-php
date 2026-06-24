@@ -9,7 +9,7 @@ use AdrienGras\Umami\Tests\Integration\IntegrationTestCase;
 
 final class StatsIntegrationTest extends IntegrationTestCase
 {
-    private const string BROWSER_UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
+    private const BROWSER_UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
 
     public function testStatsReturnsAggregatesAfterAHit(): void
     {

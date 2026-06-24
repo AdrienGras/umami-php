@@ -10,6 +10,26 @@ Comportements non-évidents découverts au fil du projet. Un H2 par quirk, avec 
 
 ---
 
+## Le dev box PHP 8.5 masque les incompatibilités du floor 8.2 (2026-06-24)
+
+**Découvert** : premier run CI (release 0.1.0). Jobs `Gate` PHP 8.3/8.4/8.5 verts, **8.2 rouge**
+(php-cs-fixer lint + phpstan : *« Class constants with native types are supported only on PHP 8.3
+and later »*).
+
+**Symptôme** : du code utilisant une feature 8.3+ (ici `private const string BROWSER_UA` — **typed
+class constant**, PHP 8.3+) passe en local et casse seulement sur PHP 8.2, alors que `composer.json`
+déclare `php: ^8.2`. La machine de dev tourne PHP 8.5 → aucun signal local.
+
+**Cause** : la porte locale n'imposait aucune version cible ; php-cs-fixer/phpstan analysaient avec
+le runtime courant (8.5), pas avec le floor du `require`.
+
+**Workaround / garde** : `phpstan.neon` → `phpVersion: { min: 80200, max: 80500 }`. phpstan analyse
+désormais sur tout le range supporté et signale en local toute feature plus récente que 8.2. La porte
+(`scripts/check.sh`) attrape donc ce type de régression **avant** la CI.
+
+**Référence** : `phpstan.neon`, `.github/workflows/ci.yml` (matrice 8.2→8.5),
+`tests/Integration/{Tracking,Stats}/*` (les 2 constantes dé-typées).
+
 ## `POST /api/teams` renvoie un tuple `[team, ownerMembership]`, pas l'objet team (2026-06-24)
 
 **Découvert** : tests d'intégration de `TeamEntrypoint::create` (étape 7.6) — `create()` renvoyait
