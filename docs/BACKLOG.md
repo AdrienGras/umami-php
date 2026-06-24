@@ -35,7 +35,11 @@ Une fois faite, déplace-la en `INDEX.md` (livré) ou supprime-la (abandonnée).
   (`teams/websites`), enum `UserRole`, 16 tests unit + 3 intégration.
 - [x] **`TeamEntrypoint`** ✅ livré (étape 7.6) : CRUD + `listAll`/`join`/membres/`websites`, enum
   `TeamRole`, 23 tests unit + 2 intégration. Quirk tuple `create` consigné.
-- [ ] `ReportEntrypoint` : candidat prochaine étape (7.7).
+- [x] **`ReportEntrypoint`** ✅ livré (étape 7.7) : CRUD rapports sauvegardés + 9 générations, enum
+  `ReportType`, helper `asArray`, 25 tests unit + 3 intégration. Quirks `filters`-objet + forme variable consignés.
+  → **La lib couvre désormais tout le cœur de l'API Umami v3.1.0.**
+- [ ] `GET /api/websites/[websiteId]/reports` — sous-route website listant les reports d'un site
+  (redondante avec `reports->list(websiteId)`, déférée étape 7.7).
 
 ## Sous-routes Team non couvertes (étape 7.6 — déféré)
 

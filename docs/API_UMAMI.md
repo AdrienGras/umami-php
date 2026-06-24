@@ -304,11 +304,17 @@ Réf : `src/app/api/auth/login/route.ts`. **PUBLIC** (`skipAuth:true`). **Schém
 | `…/session-data/properties` | `startAt,endAt` **requis** + `@filters` | props session ⚠ live | `session-data/properties:8` |
 | `…/session-data/values` | `startAt,endAt` **requis** + `propertyName?,@filters` | `[{value, total}]` ⚠ live | `session-data/values:8` |
 
-### 4.4 Reports & Contenu
+### 4.4 Reports & Contenu — ✅ vérifié live (étape 7.7, `ReportEntrypoint`)
 
 **Reports d'exécution** (`POST /api/reports/<type>`) — body = intersection `{websiteId(uuid),
 filters}` + `{type, parameters}` (`reportResultSchema`, `schema.ts:293`). `parameters` validé par
 `type`. Tous **Auth Bearer**. La plupart : `startDate`+`endDate` (date) requis dans `parameters`.
+
+> **Live (étape 7.7)** : `filters` est **requis et doit être un objet** — l'omettre →
+> `400 "expected object, received undefined"` ; `{}` accepté. La lib envoie donc toujours `filters`
+> comme objet (`{}` si vide). **La forme de réponse varie par type** : `funnel` → **liste**
+> `[{type,value,visitors,previous,dropped,dropoff,remaining}]` ; `utm` → **objet** `{utm_source,…}`.
+> D'où le passthrough `asArray` (pas `asObject`) côté lib. Cf. `QUIRKS.md`.
 
 | Report | `parameters` spécifiques | Réf |
 |---|---|---|
@@ -325,6 +331,9 @@ filters}` + `{type, parameters}` (`reportResultSchema`, `schema.ts:293`). `param
 **Reports CRUD** : `GET POST /api/reports` (POST body `reportSchema` : `websiteId, type, name(≤200),
 description?(≤500), parameters`), `GET POST DELETE /api/reports/[reportId]`,
 `GET /api/websites/[websiteId]/reports`. Réf `reports/route.ts:9/49`, `reports/[reportId]/route.ts:7/25/59`.
+- ✅ vérifié live : `GET /api/reports` requiert `websiteId` en query ; POST retourne l'objet report
+  (`description` renvoyée `""` si omise). `/api/websites/[websiteId]/reports` non implémenté (déféré, redondant
+  avec `reports->list(websiteId)`).
 
 **Boards / Links / Pixels** (Auth Bearer, CRUD + `/shares`) :
 - `GET POST /api/boards` (POST : `type`(BOARD_TYPES), `name`≤100, `description?`, `userId?/teamId?`,

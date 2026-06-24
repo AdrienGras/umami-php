@@ -6,6 +6,41 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 
 ---
 
+## 2026-06-24 — Domaine Reports (BOOTSTRAP étape 7.7) — DERNIER GROS DOMAINE
+
+### Dernière chose faite
+- **Reports entièrement livré** (25 tests unit + 3 intégration verts, porte verte) en TDD, après brainstorming
+  + spec (`docs/superpowers/specs/2026-06-24-reports-design.md`).
+  - `src/Entrypoints/ReportEntrypoint.php` (`$umami->reports`) : CRUD rapports sauvegardés
+    (`list/get/create/update/delete`) + **9 générations** (`funnel/retention/utm/goal/journey/revenue/
+    attribution/performance/breakdown`).
+  - Enum `ReportType` (9 types). 6 Requests (`src/Requests/Report/`), dont `GenerateReport` **factorisée**
+    (type = segment d'URL). **Zéro nouveau VO** : `Filters`/`Period` réutilisés tels quels.
+  - Nouveau helper `AbstractEntrypoint::asArray` (passthrough préservant la forme native).
+  - Câblé dans `UmamiApi` (`public readonly ReportEntrypoint $reports`).
+  - **2 quirks live** (consignés QUIRKS) : `filters` requis comme **objet** (`{}` si vide, sinon 400) ;
+    réponses génération de **forme variable** (`funnel`→liste, `utm`→objet) → `asArray`.
+- Mémoire : INDEX, API_UMAMI §4.4 (✅ + quirks), QUIRKS, CHANGELOG (0.2.0), spec, ce HANDOFF.
+
+### Trucs en suspens
+- **La lib couvre désormais TOUTE l'API Umami v3.1.0 « principale »** (tracking/auth/stats/websites/users/
+  teams/reports). Reste uniquement des sous-routes annexes (BACKLOG : realtime/shares/export/segments/
+  event-data ; boards/links/pixels ; websites/[id]/reports).
+- `parameters` de génération **non typés** (array libre, choix de design validé) — l'utilisateur doit connaître
+  les params par type (documentés dans la spec + API_UMAMI §4.4).
+
+### Prochaine chose à creuser
+- **Tag 0.2.0** (CHANGELOG prêt) une fois validé — même procédure que 0.1.0 (attendre CI verte, tag, le hook
+  Packagist synchronise). Puis la lib est « feature-complete » pour le cœur de l'API.
+- Optionnel ensuite : sous-routes annexes à la demande, ou bridge Symfony (BACKLOG).
+
+### Notes pour future Claude
+- `asArray` = le 3e normaliseur de réponse (après `asObject`/`asList`). À utiliser quand la forme varie.
+- `filters` génération : TOUJOURS objet. `(object)($filters?->toQuery() ?? [])`.
+- `GenerateReport` est paramétrée par le type → si Umami ajoute un type, ajouter juste une méthode + un cas d'enum.
+
+---
+
 ## 2026-06-24 — Préparation release 0.1.0 (CI + packaging)
 
 ### Dernière chose faite

@@ -62,6 +62,20 @@ abstract readonly class AbstractEntrypoint
     }
 
     /**
+     * Return the decoded JSON as-is when it is already an array (list OR
+     * object), else an empty array. Unlike {@see asObject()}/{@see asList()},
+     * this preserves the native shape — useful where the same family of
+     * endpoints answers with either form (e.g. report generation: `funnel`
+     * returns a list, `utm` returns an object).
+     *
+     * @return array<array-key, mixed>
+     */
+    protected function asArray(mixed $value): array
+    {
+        return is_array($value) ? $value : [];
+    }
+
+    /**
      * Keep only non-null entries — optional fields are never sent.
      *
      * @param array<string, mixed> $values

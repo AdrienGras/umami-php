@@ -145,6 +145,38 @@ $umami->teams->removeMember($team['id'], $user['id']);
 $umami->teams->join($team['accessCode']);
 ```
 
+### Reports
+
+Saved-report CRUD plus nine on-the-fly generation endpoints. Generation `parameters` are passed
+through as-is (the server validates them); the existing `Filters` value object is reused.
+
+```php
+use AdrienGras\Umami\Enums\ReportType;
+use AdrienGras\Umami\Stats\Filters;
+
+// Saved reports
+$saved = $umami->reports->create(
+    websiteId: $websiteId,
+    type: ReportType::Funnel,
+    name: 'Checkout funnel',
+    parameters: ['window' => 3_600_000, 'steps' => [/* ... */]],
+);
+$reports = $umami->reports->list($websiteId, ReportType::Funnel);
+
+// Ad-hoc generation (one method per report type)
+$funnel = $umami->reports->funnel($websiteId, [
+    'startDate' => '2026-01-01',
+    'endDate'   => '2026-01-31',
+    'window'    => 3_600_000,
+    'steps'     => [
+        ['type' => 'path', 'value' => '/'],
+        ['type' => 'event', 'value' => 'signup'],
+    ],
+], new Filters(country: 'FR'));
+
+$utm = $umami->reports->utm($websiteId, ['startDate' => '2026-01-01', 'endDate' => '2026-01-31']);
+```
+
 ## Error handling
 
 Every failed request raises an exception (Saloon's `AlwaysThrowOnErrors`). All library

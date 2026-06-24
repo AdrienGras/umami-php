@@ -6,6 +6,7 @@ namespace AdrienGras\Umami;
 
 use AdrienGras\Umami\Contracts\SkipsAuth;
 use AdrienGras\Umami\Entrypoints\AuthEntrypoint;
+use AdrienGras\Umami\Entrypoints\ReportEntrypoint;
 use AdrienGras\Umami\Entrypoints\StatsEntrypoint;
 use AdrienGras\Umami\Entrypoints\TeamEntrypoint;
 use AdrienGras\Umami\Entrypoints\TrackingEntrypoint;
@@ -49,6 +50,9 @@ class UmamiApi extends Connector
     /** Team façade: CRUD + join + members + admin listing + websites sub-route. */
     public readonly TeamEntrypoint $teams;
 
+    /** Report façade: saved-report CRUD + nine generation endpoints. */
+    public readonly ReportEntrypoint $reports;
+
     /**
      * Current reporting Bearer token. Seeded from $apiToken, then updated by
      * {@see withToken()} (e.g. after AuthEntrypoint::login()).
@@ -67,6 +71,7 @@ class UmamiApi extends Connector
         $this->websites = new WebsiteEntrypoint($this);
         $this->users = new UserEntrypoint($this);
         $this->teams = new TeamEntrypoint($this);
+        $this->reports = new ReportEntrypoint($this);
 
         if ($this->useDebug) {
             $this->debug();

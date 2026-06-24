@@ -10,6 +10,26 @@ Comportements non-évidents découverts au fil du projet. Un H2 par quirk, avec 
 
 ---
 
+## Reports : `filters` requis comme objet + réponses de génération de forme variable (2026-06-24)
+
+**Découvert** : implémentation `ReportEntrypoint` (étape 7.7), sondage live des 9 endpoints de génération.
+
+**Deux pièges** :
+
+1. **`filters` est requis ET doit être un objet JSON.** `POST /api/reports/<type>` sans `filters` →
+   `400 "Invalid input: expected object, received undefined"`. `filters:{}` → `200`. En PHP, un array
+   assoc vide `[]` s'encode en `[]` (array JSON), **pas** `{}` → rejeté. La lib envoie donc
+   `(object)($filters?->toQuery() ?? [])` : `new stdClass()` quand vide → `{}` sur le fil.
+
+2. **La forme de réponse varie selon le type de rapport.** `funnel` renvoie une **liste**
+   `[{type,value,visitors,…}]`, `utm` un **objet** `{utm_source,…}`, `performance`/`revenue` des objets
+   composites. Impossible d'appliquer `asObject`/`asList` uniformément → helper **`asArray`**
+   (passthrough : retourne le décodé tel quel si array, sinon `[]`) ajouté à `AbstractEntrypoint`.
+   Les 9 méthodes de génération l'utilisent ; le CRUD garde `asObject`.
+
+**Référence** : `src/Entrypoints/ReportEntrypoint.php` (`generate()`, `asArray`),
+`src/Entrypoints/Impl/AbstractEntrypoint.php::asArray`, `tests/Unit/Report/ReportEntrypointTest.php`.
+
 ## Le dev box PHP 8.5 masque les incompatibilités du floor 8.2 (2026-06-24)
 
 **Découvert** : premier run CI (release 0.1.0). Jobs `Gate` PHP 8.3/8.4/8.5 verts, **8.2 rouge**
