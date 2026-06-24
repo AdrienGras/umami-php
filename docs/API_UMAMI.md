@@ -186,26 +186,30 @@ Réf : `src/app/api/auth/login/route.ts`. **PUBLIC** (`skipAuth:true`). **Schém
   `createdAt desc` (password omis). Réf `admin/users/route.ts:8`, `admin/teams/route.ts:8`.
 - Live (`/api/admin/users` seul) : forme `{data, count, page, pageSize}`. `/api/admin/teams` non encore implémenté.
 
-#### `GET POST /api/teams`
+#### `GET POST /api/teams` — ✅ vérifié live (étape 7.6, `TeamEntrypoint::list`/`create`)
 - Auth Bearer. GET : `@paging` → équipes du user. POST (+`canCreateTeam`) : `name` (requis, ≤50),
   `ownerId` (uuid opt) → team créé (`accessCode` généré). Réf `teams/route.ts:12/30`.
+- ⚠ **Live (POST)** : renvoie un **tuple** `[team, ownerMembership]`, pas l'objet team. `create()` unwrap
+  l'élément `[0]`. Cf. `QUIRKS.md`. GET renvoie `{data, count, page, pageSize}` (chaque team a `members`+`_count`).
 
-#### `POST /api/teams/join`
+#### `POST /api/teams/join` — ✅ vérifié live (étape 7.6, `TeamEntrypoint::join`)
 - Auth Bearer. Body : `accessCode` (requis, ≤50). `404 team-not-found` / `400` déjà membre. Réf
-  `teams/join/route.ts:7`.
+  `teams/join/route.ts:7`. Live : retourne le `TeamUser` créé (`role: "team-member"`).
 
-#### `GET POST DELETE /api/teams/[teamId]`
+#### `GET POST DELETE /api/teams/[teamId]` — ✅ vérifié live (étape 7.6, `get`/`update`/`delete`)
 - Auth Bearer (`canViewTeam`/`canUpdateTeam`/`canDeleteTeam`). POST body : `name`(opt ≤50),
-  `accessCode`(opt ≤50). Réf `teams/[teamId]/route.ts:7/29/52`.
+  `accessCode`(opt ≤50). Réf `teams/[teamId]/route.ts:7/29/52`. Live : `update` renvoie l'objet team direct.
 
-#### `GET POST /api/teams/[teamId]/users` · `GET POST DELETE /api/teams/[teamId]/users/[userId]`
+#### `GET POST /api/teams/[teamId]/users` · `GET POST DELETE /api/teams/[teamId]/users/[userId]` — ✅ vérifié live (étape 7.6)
 - Auth Bearer. POST (ajout/maj) body : `userId` (uuid requis, ajout) + `role` (requis ∈
   `team-member|team-view-only|team-manager`). Réf `teams/[teamId]/users/route.ts:8/54`,
-  `teams/[teamId]/users/[userId]/route.ts:8/29/60`.
+  `teams/[teamId]/users/[userId]/route.ts:8/29/60`. Live : `addMember`/`member`/`updateMember` renvoient
+  l'objet `TeamUser` direct (`{id, teamId, userId, role}`).
 
 #### `GET /api/teams/[teamId]/{websites,boards,links,pixels}`
 - Auth Bearer + `canViewTeam`. Query `@paging` + `search`. Listes paginées. Réf
   `teams/[teamId]/{websites,boards,links,pixels}/route.ts:8`.
+- ✅ `websites` vérifié live (étape 7.6, `TeamEntrypoint::websites`). `boards`/`links`/`pixels` déférés (BACKLOG).
 
 #### `GET /api/heartbeat` — **PUBLIC** (pas de `parseRequest`)
 - Réponse `{ok:true}`. ⚠ Aucune auth requise (corrige une intuition courante). Réf `heartbeat/route.ts:1`.

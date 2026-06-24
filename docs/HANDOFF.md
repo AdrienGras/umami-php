@@ -6,6 +6,44 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 
 ---
 
+## 2026-06-24 — Domaine Teams (BOOTSTRAP étape 7.6)
+
+### Dernière chose faite
+- **Teams entièrement livré** (23 tests unit + 2 intégration verts, porte verte) en TDD strict.
+  - `src/Entrypoints/TeamEntrypoint.php` (`$umami->teams`) : CRUD (`list/get/create/update/delete`)
+    + `listAll` (admin) + `join` + membres (`members/member/addMember/updateMember/removeMember`) + `websites`.
+  - Enum `src/Enums/TeamRole.php` (`team-member/team-view-only/team-manager`) — **`team-owner` exclu** (rôle
+    implicite du créateur, non assignable via l'API). Type-safe → pas de garde runtime sur `role`.
+  - 13 Requests Saloon (`src/Requests/Team/`). Gardes : `name` ≤50, `accessCode` ≤50, `id`/`userId` non vides.
+  - Câblé dans `UmamiApi` (`public readonly TeamEntrypoint $teams`).
+  - **QUIRK live découvert** : `POST /api/teams` renvoie un **tuple** `[team, ownerMembership]` (transaction
+    Prisma qui fuite ses 2 rows), pas l'objet team. `create()` **unwrap** l'élément `[0]`. Consigné QUIRKS.md.
+    Les autres routes (`update/addMember/member/updateMember`) renvoient des objets directs (vérifié live).
+  - Test intégration `join` **end-to-end** : admin crée team+user, le user se logge sur SON connector et
+    `join(accessCode)`, l'admin confirme le membership. Couvre le flux multi-utilisateur réel.
+- Mémoire : `INDEX.md`, `API_UMAMI.md` §4.1 (teams ✅ vérifiés), `QUIRKS.md` (tuple create), `BACKLOG.md`
+  (sous-routes annexes), ce HANDOFF.
+
+### Trucs en suspens
+- Sous-routes Team **non couvertes** (déférées BACKLOG) : `boards`/`links`/`pixels` (ressources annexes),
+  `GET /api/me/teams` (alias de `list()`).
+- Helpers `compact()`/`nonEmpty`/longueur **toujours dupliqués** (Website/User/Team) → factorisation
+  `AbstractEntrypoint` de plus en plus justifiée (BACKLOG). 3 occurrences maintenant.
+- Garde `password min(8)` (Users) toujours non calibrée live.
+- README quickstart toujours à écrire.
+
+### Prochaine chose à creuser
+- **BOOTSTRAP étape 7.7** : `ReportEntrypoint` (`/api/reports/*`) — dernier gros domaine reporting.
+  OU README quickstart + factorisation helpers (dette qui s'accumule). À arbitrer avec Adrien.
+
+### Notes pour future Claude
+- `TeamRole::Manager->value` === `'team-manager'`. Pas de `team-owner` dans l'enum (volontaire).
+- `create()` est le SEUL endroit avec unwrap de tuple. Si tu ajoutes des routes, vérifie la forme live au curl avant.
+- Test intégration : noms suffixés `microtime` (pas de tearDown ; collisions évitées par unicité).
+- Le flux `join` exige un 2nd connector loggé en tant que le user (le owner est déjà membre → 400 si re-join).
+
+---
+
 ## 2026-06-24 — Domaine Users (BOOTSTRAP étape 7.5)
 
 ### Dernière chose faite

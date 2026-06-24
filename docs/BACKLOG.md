@@ -32,7 +32,16 @@ Une fois faite, déplace-la en `INDEX.md` (livré) ou supprime-la (abandonnée).
   sous-routes (`reset/transfer/dateRange/values`), 17 tests unit + 4 intégration.
 - [x] **`UserEntrypoint`** ✅ livré (étape 7.5) : CRUD (`list/get/create/update/delete`) + sous-routes
   (`teams/websites`), enum `UserRole`, 16 tests unit + 3 intégration.
-- [ ] `TeamEntrypoint` / `ReportEntrypoint` : candidats prochaine étape (7.6).
+- [x] **`TeamEntrypoint`** ✅ livré (étape 7.6) : CRUD + `listAll`/`join`/membres/`websites`, enum
+  `TeamRole`, 23 tests unit + 2 intégration. Quirk tuple `create` consigné.
+- [ ] `ReportEntrypoint` : candidat prochaine étape (7.7).
+
+## Sous-routes Team non couvertes (étape 7.6 — déféré)
+
+- [ ] `GET /api/teams/[id]/boards` — tableaux de bord d'équipe (entité non modélisée dans la lib).
+- [ ] `GET /api/teams/[id]/links` — liens d'équipe.
+- [ ] `GET /api/teams/[id]/pixels` — pixels d'équipe.
+- [ ] `GET /api/me/teams` — alias de `teams->list()` pour l'utilisateur courant (redondant).
 
 ## Sous-routes Website non couvertes (étape 7.4 — déféré)
 

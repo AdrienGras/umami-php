@@ -10,6 +10,26 @@ Comportements non-évidents découverts au fil du projet. Un H2 par quirk, avec 
 
 ---
 
+## `POST /api/teams` renvoie un tuple `[team, ownerMembership]`, pas l'objet team (2026-06-24)
+
+**Découvert** : tests d'intégration de `TeamEntrypoint::create` (étape 7.6) — `create()` renvoyait
+un array sans clé `id`/`accessCode`.
+
+**Symptôme** : la réponse de `POST /api/teams` n'est **pas** l'objet team attendu, mais une **liste à
+deux éléments** : `[ {team: id,name,accessCode,…}, {teamUser: id,teamId,userId,role:"team-owner",…} ]`.
+Le handler source fait `json(team)` mais la valeur passée est le résultat brut d'une transaction Prisma
+qui retourne ses deux `create()` (le team **et** le membership owner).
+
+**Cause** : écart source↔live classique (règle d'or n°6). Le zod/handler laissait supposer un objet ;
+le live renvoie le tuple de la transaction.
+
+**Workaround** : `TeamEntrypoint::create()` **unwrap** — si la réponse est une liste, retourner
+l'élément `[0]` (le team). Les autres routes teams (`update`, `addMember`, `member`, `updateMember`)
+renvoient bien des objets directs — vérifié live, pas de unwrap nécessaire.
+
+**Référence** : `src/Entrypoints/TeamEntrypoint.php::create`, `teams/route.ts:31`,
+`tests/Unit/Team/TeamEntrypointTest.php::testCreateBuildsBodyOmittingNullOwner`.
+
 ## Saloon v3 entièrement vulnérable — fixé en v4 uniquement (2026-06-23)
 
 **Découvert** : au premier `composer install`.
