@@ -6,6 +6,36 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 
 ---
 
+## 2026-06-24 — Domaine Users (BOOTSTRAP étape 7.5)
+
+### Dernière chose faite
+- **Users entièrement livré** (16 tests unit + 3 intégration verts, porte verte) en TDD strict (RED → GREEN → porte).
+  - `src/Entrypoints/UserEntrypoint.php` (`$umami->users`) : `list/get/create/update/delete` (CRUD)
+    + `teams/websites` (sous-routes paginées par user).
+  - Enum `src/Enums/UserRole.php` (`admin/user/view-only`) — type-safe, calqué sur `MaskLevel` : pas de garde runtime sur `role`.
+  - 7 Requests Saloon (`src/Requests/User/`). Gardes : `username` non vide ≤255, `password` 8–255 (non trimé), `id` non vide.
+  - Câblé dans `UmamiApi` (`public readonly UserEntrypoint $users`).
+  - **Décision clé** : `list()` tape `GET /api/admin/users` (route admin paginée) car `/api/users/route.ts` n'exporte **que** POST. Vérifié au source.
+  - **Confirmé live** : `create` echo le `role` en lowercase (`user`/`view-only`/`admin`) ; `websites->get()` expose `userId` (utilisé pour dogfooder la sous-route `users->websites`).
+- Mémoire consolidée : `INDEX.md` (ligne Users), `API_UMAMI.md` §4.1 (`⚠` users levés), `BACKLOG.md` (UserEntrypoint coché + factorisation helpers notée), ce HANDOFF.
+
+### Trucs en suspens
+- **Garde `password` min(8)** : reproduite du zod source, mais **non calibrée contre le live** (règle d'or n°6) — l'API pourrait être plus laxiste. Marqueur `⚠ à vérifier (live)` laissé dans `API_UMAMI.md`. Tester un create avec password <8 pour trancher.
+- Sous-routes Team non couvertes : tout `TeamEntrypoint` (`/api/teams/*`) reste à faire.
+- Helpers `compact()`/`nonEmpty`/longueur dupliqués entre `WebsiteEntrypoint` et `UserEntrypoint` → factorisation possible dans `AbstractEntrypoint` (notée BACKLOG).
+- README quickstart toujours à écrire.
+
+### Prochaine chose à creuser
+- **BOOTSTRAP étape 7.6** : `TeamEntrypoint` (CRUD teams + `join` + sous-routes `users`/`websites`) ou `ReportEntrypoint`, ou README quickstart — selon arbitrage avec Adrien.
+
+### Notes pour future Claude
+- Pattern Users = copie conforme de Websites. `UserRole::User->value` === `'user'`.
+- `update()` n'envoie que les champs fournis (`compact` + `role?->value`). `password` non trimé (espaces significatifs).
+- Test intégration : username suffixé `microtime` pour éviter les collisions « User already exists » entre runs.
+- GET-after-delete sur user : non testé (contourné via `list()` comme pour Websites). Comportement potentiellement ≠ du 200+null des websites.
+
+---
+
 ## 2026-06-23 — Domaine Websites (BOOTSTRAP étape 7.4)
 
 ### Dernière chose faite

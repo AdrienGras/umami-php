@@ -13,6 +13,12 @@ Une fois faite, déplace-la en `INDEX.md` (livré) ou supprime-la (abandonnée).
 
 ## Tooling / qualité
 
+- [ ] **Factoriser les helpers d'Entrypoint** : `compact()` (filtre les nuls) et les gardes `nonEmpty`/longueur
+  sont dupliqués entre `WebsiteEntrypoint` et `UserEntrypoint`. Candidats à remonter dans `AbstractEntrypoint`
+  (comme `asObject`/`asList` à l'étape 7.3). Reporté pour ne pas élargir le diff Users (étape 7.5).
+- [ ] **Calibrer la garde `password` min(8)** (`UserEntrypoint::create`/`update`) contre le live : tester
+  un create avec password <8 caractères pour savoir si l'API rejette réellement (règle d'or n°6). Si l'API est
+  laxiste, assouplir/retirer la garde. ⚠ marqueur live dans `API_UMAMI.md` §4.1.
 - [ ] **Durcir `UmamiApiResponse` contre les réponses 200 + body `null`** : un GET sur une ressource supprimée (ex. website) renvoie HTTP 200 avec body `null` → Saloon lève un `TypeError` brut (assignation de `null` à `array $decodedJson`) au lieu d'un `UmamiApiException`. Aucun 200 d'Umami ne devrait s'échapper en `TypeError` PHP. Option : requalifier 200+null en `UmamiApiException` ou retourner `[]` dans la Response custom. Découvert à l'étape 7.4 (cf. QUIRKS.md).
 - [ ] Câbler `scripts/check.sh` en **git pre-commit hook** réel (`.git/hooks/pre-commit`) pour
   forcer la porte automatiquement, pas seulement par discipline.
@@ -24,7 +30,9 @@ Une fois faite, déplace-la en `INDEX.md` (livré) ou supprime-la (abandonnée).
 
 - [x] **`WebsiteEntrypoint`** ✅ livré (étape 7.4) : CRUD (`list/get/create/update/delete`) +
   sous-routes (`reset/transfer/dateRange/values`), 17 tests unit + 4 intégration.
-- [ ] `UserEntrypoint` / `TeamEntrypoint` / `ReportEntrypoint` : candidats BACKLOG si hors usage immédiat.
+- [x] **`UserEntrypoint`** ✅ livré (étape 7.5) : CRUD (`list/get/create/update/delete`) + sous-routes
+  (`teams/websites`), enum `UserRole`, 16 tests unit + 3 intégration.
+- [ ] `TeamEntrypoint` / `ReportEntrypoint` : candidats prochaine étape (7.6).
 
 ## Sous-routes Website non couvertes (étape 7.4 — déféré)
 

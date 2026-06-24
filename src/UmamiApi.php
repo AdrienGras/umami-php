@@ -8,6 +8,7 @@ use AdrienGras\Umami\Contracts\SkipsAuth;
 use AdrienGras\Umami\Entrypoints\AuthEntrypoint;
 use AdrienGras\Umami\Entrypoints\StatsEntrypoint;
 use AdrienGras\Umami\Entrypoints\TrackingEntrypoint;
+use AdrienGras\Umami\Entrypoints\UserEntrypoint;
 use AdrienGras\Umami\Entrypoints\WebsiteEntrypoint;
 use AdrienGras\Umami\Responses\UmamiApiResponse;
 use Saloon\Http\Connector;
@@ -41,6 +42,9 @@ class UmamiApi extends Connector
     /** Website façade: CRUD + reset/transfer/daterange/values. */
     public readonly WebsiteEntrypoint $websites;
 
+    /** User façade: CRUD + admin listing + teams/websites sub-routes. */
+    public readonly UserEntrypoint $users;
+
     /**
      * Current reporting Bearer token. Seeded from $apiToken, then updated by
      * {@see withToken()} (e.g. after AuthEntrypoint::login()).
@@ -57,6 +61,7 @@ class UmamiApi extends Connector
         $this->auth = new AuthEntrypoint($this);
         $this->stats = new StatsEntrypoint($this);
         $this->websites = new WebsiteEntrypoint($this);
+        $this->users = new UserEntrypoint($this);
 
         if ($this->useDebug) {
             $this->debug();

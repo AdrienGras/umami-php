@@ -163,22 +163,28 @@ Réf : `src/app/api/auth/login/route.ts`. **PUBLIC** (`skipAuth:true`). **Schém
 #### `GET /api/me/teams`
 - Auth Bearer. Query `@paging`. Réponse : équipes de l'utilisateur (paginé). Réf `me/teams/route.ts:7`.
 
-#### `POST /api/users`
+#### `POST /api/users` — ✅ vérifié live (étape 7.5, `UserEntrypoint::create`)
 - Auth Bearer + `canCreateUser`. Body : `id` (uuid opt), `username` (requis, ≤255), `password`
   (requis, 8–255), `role` (requis ∈ `admin|user|view-only`). `400` si username pris. Réf `users/route.ts:11`.
+- Live : `role` echoé en **lowercase** dans la réponse (`user`/`view-only`/`admin`). Le `password` **min 8**
+  est reproduit comme garde côté lib mais ⚠ **à vérifier (live)** — l'API pourrait être plus laxiste (règle d'or n°6).
 
-#### `GET POST DELETE /api/users/[userId]`
+#### `GET POST DELETE /api/users/[userId]` — ✅ vérifié live (étape 7.5, `get`/`update`/`delete`)
 - Auth Bearer (`canViewUser`/`canUpdateUser`/`canDeleteUser`). POST body : `username`(opt ≤255),
   `password`(opt 8–255), `role`(opt enum) — `role`/`username` appliqués seulement si admin. DELETE :
   `400 "You cannot delete yourself."` si auto-suppression. Réf `users/[userId]/route.ts:9/27/83`.
+- Live : `update` n'envoie que les champs fournis ; `delete` renvoie `{}`. GET-after-delete non testé
+  (contourné via `list()`) — comportement potentiellement ≠ du 200+null des websites.
 
-#### `GET /api/users/[userId]/teams` · `GET /api/users/[userId]/websites`
+#### `GET /api/users/[userId]/teams` · `GET /api/users/[userId]/websites` — ✅ vérifié live (étape 7.5, `teams`/`websites`)
 - Auth Bearer (self OU admin). Query `@paging` (+ `search`, `includeTeams` pour websites). Réf
   `users/[userId]/teams/route.ts:7`, `users/[userId]/websites/route.ts:7`.
+- Live : forme paginée `{data, count, page, pageSize}`. `websites` de l'owner contient bien le website seedé.
 
-#### `GET /api/admin/users` · `GET /api/admin/teams`
+#### `GET /api/admin/users` — ✅ vérifié live (étape 7.5, `UserEntrypoint::list`) · `GET /api/admin/teams`
 - Auth Bearer + `canViewUsers`/`canViewAllTeams`. Query `@paging` + `search`. Listes paginées triées
   `createdAt desc` (password omis). Réf `admin/users/route.ts:8`, `admin/teams/route.ts:8`.
+- Live (`/api/admin/users` seul) : forme `{data, count, page, pageSize}`. `/api/admin/teams` non encore implémenté.
 
 #### `GET POST /api/teams`
 - Auth Bearer. GET : `@paging` → équipes du user. POST (+`canCreateTeam`) : `name` (requis, ≤50),
