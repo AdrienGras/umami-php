@@ -11,6 +11,25 @@ Si tu découvres un pattern récurrent : documente-le ici.
 
 ---
 
+## Helpers partagés d'`AbstractEntrypoint` (factorisés étape consolidation 2026-06-24)
+
+Les gardes d'entrée et la mise en forme de query/body sont **mutualisées** dans
+`AbstractEntrypoint` (`src/Entrypoints/Impl/`). Un Entrypoint NE redéfinit PAS ces helpers —
+il les appelle :
+
+| Helper (protected) | Rôle |
+|---|---|
+| `compact(array $values): array` | Retire les entrées `null` (les optionnels ne sont jamais envoyés). À utiliser pour tout `query`/`body`. |
+| `nonEmpty(string $value, string $field): string` | `trim` + rejet si vide (`InvalidArgumentException`). Pour les ids et champs requis non bornés. |
+| `boundedString(string $value, string $field, int $maxLength): string` | `nonEmpty` + longueur max. Pour les champs requis bornés (`name`, `domain`, `accessCode`, `username`…). |
+| `asObject(mixed): array` / `asList(mixed): array` | Normalisation de la réponse décodée. |
+
+**Règles tacites** :
+- Un Entrypoint expose des wrappers privés *sémantiques* qui délèguent (`websiteId($id) => nonEmpty($id, 'id')`,
+  `name($n) => boundedString($n, 'name', 50)`), pour la lisibilité — pas de logique dupliquée.
+- Garde **non trimmée** (ex. `password` : espaces significatifs, min ET max) → reste **locale** à l'Entrypoint,
+  ne pas la forcer dans les helpers partagés.
+
 ## Request (POST body JSON) — squelette représentatif
 
 ```php

@@ -167,7 +167,8 @@ Réf : `src/app/api/auth/login/route.ts`. **PUBLIC** (`skipAuth:true`). **Schém
 - Auth Bearer + `canCreateUser`. Body : `id` (uuid opt), `username` (requis, ≤255), `password`
   (requis, 8–255), `role` (requis ∈ `admin|user|view-only`). `400` si username pris. Réf `users/route.ts:11`.
 - Live : `role` echoé en **lowercase** dans la réponse (`user`/`view-only`/`admin`). Le `password` **min 8**
-  est reproduit comme garde côté lib mais ⚠ **à vérifier (live)** — l'API pourrait être plus laxiste (règle d'or n°6).
+  est **confirmé live** (étape consolidation 2026-06-24) : POST avec password <8 → `400 bad-request`
+  `{password:["Too small: expected string to have >=8 characters"]}`. La garde côté lib est donc justifiée.
 
 #### `GET POST DELETE /api/users/[userId]` — ✅ vérifié live (étape 7.5, `get`/`update`/`delete`)
 - Auth Bearer (`canViewUser`/`canUpdateUser`/`canDeleteUser`). POST body : `username`(opt ≤255),

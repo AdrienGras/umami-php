@@ -145,33 +145,18 @@ readonly class UserEntrypoint extends AbstractEntrypoint
 
     private function userId(string $id): string
     {
-        $id = trim($id);
-
-        if ('' === $id) {
-            throw new InvalidArgumentException('id must not be empty.');
-        }
-
-        return $id;
+        return $this->nonEmpty($id, 'id');
     }
 
     private function username(string $username): string
     {
-        $username = trim($username);
-
-        if ('' === $username) {
-            throw new InvalidArgumentException('username must not be empty.');
-        }
-
-        if (mb_strlen($username) > 255) {
-            throw new InvalidArgumentException('username must be at most 255 characters.');
-        }
-
-        return $username;
+        return $this->boundedString($username, 'username', 255);
     }
 
     /**
      * Password length guard. The 8-char minimum mirrors Umami's zod schema.
-     * Not trimmed — surrounding whitespace is significant in a password.
+     * Not trimmed — surrounding whitespace is significant in a password — so it
+     * stays local rather than reusing the shared trimming helpers.
      */
     private function password(string $password): string
     {
@@ -186,17 +171,5 @@ readonly class UserEntrypoint extends AbstractEntrypoint
         }
 
         return $password;
-    }
-
-    /**
-     * Keep only non-null entries (optionals are never sent).
-     *
-     * @param array<string, mixed> $values
-     *
-     * @return array<string, mixed>
-     */
-    private function compact(array $values): array
-    {
-        return array_filter($values, static fn (mixed $value): bool => null !== $value);
     }
 }

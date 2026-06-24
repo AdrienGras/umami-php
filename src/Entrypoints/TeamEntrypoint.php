@@ -19,7 +19,6 @@ use AdrienGras\Umami\Requests\Team\ListTeamWebsites;
 use AdrienGras\Umami\Requests\Team\RemoveTeamUser;
 use AdrienGras\Umami\Requests\Team\UpdateTeam;
 use AdrienGras\Umami\Requests\Team\UpdateTeamUser;
-use InvalidArgumentException;
 
 /**
  * Team façade — `…/api/teams` CRUD, the `join` flow, per-team membership
@@ -207,46 +206,11 @@ readonly class TeamEntrypoint extends AbstractEntrypoint
 
     private function name(string $name): string
     {
-        $name = $this->nonEmpty($name, 'name');
-
-        if (mb_strlen($name) > 50) {
-            throw new InvalidArgumentException('name must be at most 50 characters.');
-        }
-
-        return $name;
+        return $this->boundedString($name, 'name', 50);
     }
 
     private function accessCode(string $accessCode): string
     {
-        $accessCode = $this->nonEmpty($accessCode, 'accessCode');
-
-        if (mb_strlen($accessCode) > 50) {
-            throw new InvalidArgumentException('accessCode must be at most 50 characters.');
-        }
-
-        return $accessCode;
-    }
-
-    private function nonEmpty(string $value, string $field): string
-    {
-        $value = trim($value);
-
-        if ('' === $value) {
-            throw new InvalidArgumentException(\sprintf('%s must not be empty.', $field));
-        }
-
-        return $value;
-    }
-
-    /**
-     * Keep only non-null entries (optionals are never sent).
-     *
-     * @param array<string, mixed> $values
-     *
-     * @return array<string, mixed>
-     */
-    private function compact(array $values): array
-    {
-        return array_filter($values, static fn (mixed $value): bool => null !== $value);
+        return $this->boundedString($accessCode, 'accessCode', 50);
     }
 }

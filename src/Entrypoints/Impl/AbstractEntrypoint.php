@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AdrienGras\Umami\Entrypoints\Impl;
 
 use AdrienGras\Umami\UmamiApi;
+use InvalidArgumentException;
 
 /**
  * Base class for every domain entrypoint.
@@ -58,5 +59,49 @@ abstract readonly class AbstractEntrypoint
         }
 
         return $list;
+    }
+
+    /**
+     * Keep only non-null entries — optional fields are never sent.
+     *
+     * @param array<string, mixed> $values
+     *
+     * @return array<string, mixed>
+     */
+    protected function compact(array $values): array
+    {
+        return array_filter($values, static fn (mixed $value): bool => null !== $value);
+    }
+
+    /**
+     * Trim a value and reject it when empty.
+     *
+     * @throws InvalidArgumentException when the trimmed value is empty
+     */
+    protected function nonEmpty(string $value, string $field): string
+    {
+        $value = trim($value);
+
+        if ('' === $value) {
+            throw new InvalidArgumentException(\sprintf('%s must not be empty.', $field));
+        }
+
+        return $value;
+    }
+
+    /**
+     * Trim a value, reject it when empty, then enforce a maximum length.
+     *
+     * @throws InvalidArgumentException when empty or longer than $maxLength
+     */
+    protected function boundedString(string $value, string $field, int $maxLength): string
+    {
+        $value = $this->nonEmpty($value, $field);
+
+        if (mb_strlen($value) > $maxLength) {
+            throw new InvalidArgumentException(\sprintf('%s must be at most %d characters.', $field, $maxLength));
+        }
+
+        return $value;
     }
 }

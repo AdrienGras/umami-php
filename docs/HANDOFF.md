@@ -6,6 +6,33 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 
 ---
 
+## 2026-06-24 — Consolidation (factorisation helpers + README + calibrage password)
+
+### Dernière chose faite
+- **Factorisation des helpers d'Entrypoint** (refactor sous filet, 99 tests unit toujours verts, porte verte) :
+  `compact()`, `nonEmpty()`, nouveau `boundedString()` remontés dans `AbstractEntrypoint`. Website/User/Team
+  n'ont plus que des wrappers privés sémantiques qui délèguent. `password` (User) reste local (non trimé, min+max).
+  ~70 lignes de duplication supprimées. Documenté dans `CONVENTIONS.md`.
+- **README quickstart** écrit (anglais, public Packagist) : install, client, tracking, auth+reporting
+  (stats/websites/users/teams), error handling (`UmamiApiException`/`BotFilteredException`). Signatures vérifiées au code.
+- **Garde `password min(8)` calibrée live** : POST `/api/users` password <8 → `400` `Too small: expected >=8`.
+  Garde confirmée justifiée. ⚠ levé dans `API_UMAMI.md` §4.1.
+
+### Trucs en suspens
+- Dette mémoire : aucune nouvelle. Tous les ⚠ des domaines livrés (Tracking/Auth/Stats/Website/User/Team) levés.
+- Domaines API restants : `ReportEntrypoint` (`/api/reports/*`) — seul gros domaine reporting non couvert.
+- Sous-routes annexes déférées (Website : realtime/shares/export/segments/… ; Team : boards/links/pixels/me-teams).
+
+### Prochaine chose à creuser
+- **BOOTSTRAP étape 7.7** : `ReportEntrypoint` (dernier domaine), ou packaging/release (tag v0.1.0, CI GitHub Actions).
+
+### Notes pour future Claude
+- Les gardes d'entrée passent TOUTES par `AbstractEntrypoint` maintenant. Pour un nouvel Entrypoint :
+  `nonEmpty`/`boundedString`/`compact` sont hérités, n'en recrée pas. Cf. `CONVENTIONS.md`.
+- Si une garde ne doit PAS trimmer (secret/password) → la garder locale.
+
+---
+
 ## 2026-06-24 — Domaine Teams (BOOTSTRAP étape 7.6)
 
 ### Dernière chose faite

@@ -70,16 +70,8 @@ readonly class WebsiteEntrypoint extends AbstractEntrypoint
         ?string $teamId = null,
         ?string $id = null,
     ): array {
-        $name = $this->nonEmpty($name, 'name');
-        $domain = $this->nonEmpty($domain, 'domain');
-
-        if (mb_strlen($name) > 100) {
-            throw new InvalidArgumentException('create() name must be at most 100 characters.');
-        }
-
-        if (mb_strlen($domain) > 500) {
-            throw new InvalidArgumentException('create() domain must be at most 500 characters.');
-        }
+        $name = $this->boundedString($name, 'name', 100);
+        $domain = $this->boundedString($domain, 'domain', 500);
 
         $payload = $this->compact([
             'name' => $name,
@@ -185,28 +177,5 @@ readonly class WebsiteEntrypoint extends AbstractEntrypoint
     private function websiteId(string $id): string
     {
         return $this->nonEmpty($id, 'id');
-    }
-
-    private function nonEmpty(string $value, string $field): string
-    {
-        $value = trim($value);
-
-        if ('' === $value) {
-            throw new InvalidArgumentException(\sprintf('%s must not be empty.', $field));
-        }
-
-        return $value;
-    }
-
-    /**
-     * Keep only non-null entries (optionals are never sent).
-     *
-     * @param array<string, mixed> $values
-     *
-     * @return array<string, mixed>
-     */
-    private function compact(array $values): array
-    {
-        return array_filter($values, static fn (mixed $value): bool => null !== $value);
     }
 }
