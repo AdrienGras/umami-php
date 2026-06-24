@@ -1,0 +1,17 @@
+# Keep the Composer dist archive lean: exclude dev-only files from the published package.
+/.github                 export-ignore
+/.vscode                 export-ignore
+/docs                    export-ignore
+/reference               export-ignore
+/scripts                 export-ignore
+/tests                   export-ignore
+/.env.test               export-ignore
+/.gitattributes          export-ignore
+/.gitignore              export-ignore
+/.mcp.json               export-ignore
+/.php-cs-fixer.dist.php   export-ignore
+/BOOTSTRAP.md            export-ignore
+/CLAUDE.md               export-ignore
+/docker-compose.test.yml export-ignore
+/phpstan.neon            export-ignore
+/phpunit.xml             export-ignore

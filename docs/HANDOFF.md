@@ -6,6 +6,35 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 
 ---
 
+## 2026-06-24 — Préparation release 0.1.0 (CI + packaging)
+
+### Dernière chose faite
+- **CI GitHub Actions** (`.github/workflows/ci.yml`) : job `gate` (matrice PHP **8.2/8.3/8.4/8.5**, rejoue
+  `bash scripts/check.sh`) + job `integration` (`docker compose up` Umami 3.1.0 → `seed-umami.sh` → phpunit
+  integration → teardown). Déclenché sur push `main` + PR. YAML validé, aucun input non-fiable (pas d'injection).
+- **Packaging Packagist** : `composer.json` enrichi (`authors` nom+GitHub **sans email**, `support` issues/source) ;
+  `.gitattributes` (export-ignore tests/docs/.github/scripts/configs → dist léger) ; `CHANGELOG.md` (entrée 0.1.0) ;
+  badges README (CI, Packagist version, PHP version, License).
+- `composer validate --strict` ✅, porte ✅.
+
+### Trucs en suspens — ACTION UTILISATEUR REQUISE
+- **Tag `v0.1.0` PAS encore créé/poussé** (acte de release, outward-facing → en attente du feu vert d'Adrien).
+  Une fois le tag poussé : Adrien importe le repo sur https://packagist.org (Submit) + active le webhook
+  GitHub→Packagist pour les updates auto. Les badges Packagist resteront « not found » tant que le package
+  n'est pas soumis.
+- CI non encore observée en vrai (premier run au prochain push). Risque connu : le seed attend le login jusqu'à
+  120s — si Umami 3.1.0 boote lentement sur le runner, augmenter la boucle dans `seed-umami.sh`.
+
+### Prochaine chose à creuser
+- Pousser le tag `v0.1.0` (après OK), vérifier le 1er run CI vert, soumettre à Packagist.
+- Puis **étape 7.7** : `ReportEntrypoint` (dernier domaine) pour une 0.2.0.
+
+### Notes pour future Claude
+- La CI `gate` réutilise `scripts/check.sh` (DRY) → toute évolution de la porte se répercute automatiquement.
+- `.gitattributes` allège le package : si un nouveau dossier dev-only apparaît, l'y ajouter en `export-ignore`.
+
+---
+
 ## 2026-06-24 — Consolidation (factorisation helpers + README + calibrage password)
 
 ### Dernière chose faite

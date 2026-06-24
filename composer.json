@@ -5,6 +5,16 @@
     "license": "MIT",
     "keywords": ["umami", "analytics", "saloon", "http-client", "tracking"],
     "homepage": "https://github.com/AdrienGras/umami-php",
+    "authors": [
+        {
+            "name": "Adrien Gras",
+            "homepage": "https://github.com/AdrienGras"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/AdrienGras/umami-php/issues",
+        "source": "https://github.com/AdrienGras/umami-php"
+    },
     "require": {
         "php": "^8.2",
         "saloonphp/saloon": "^4.0"

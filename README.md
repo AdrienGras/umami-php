@@ -1,5 +1,10 @@
 # umami-php
 
+[![CI](https://github.com/AdrienGras/umami-php/actions/workflows/ci.yml/badge.svg)](https://github.com/AdrienGras/umami-php/actions/workflows/ci.yml)
+[![Latest Version](https://img.shields.io/packagist/v/adriengras/umami-php.svg)](https://packagist.org/packages/adriengras/umami-php)
+[![PHP Version](https://img.shields.io/packagist/php-v/adriengras/umami-php.svg)](https://packagist.org/packages/adriengras/umami-php)
+[![License](https://img.shields.io/packagist/l/adriengras/umami-php.svg)](LICENSE)
+
 A standalone, framework-free PHP client for the [Umami Analytics](https://umami.is) API
 (v3.1.0), built on [Saloon v4](https://docs.saloon.dev/). It covers the **full** API surface:
 tracking (`/api/send`, `/api/batch`) as well as reporting and admin (auth, stats, websites,
