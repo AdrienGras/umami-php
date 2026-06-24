@@ -29,10 +29,14 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
 - `parameters` de génération **non typés** (array libre, choix de design validé) — l'utilisateur doit connaître
   les params par type (documentés dans la spec + API_UMAMI §4.4).
 
+### Release — ✅ FAIT
+- **`v0.2.0` taggée + GitHub Release + publiée sur Packagist** (synchro auto par le hook, vérifiée :
+  `v0.2.0` + `v0.1.0` présentes). CI verte sur le commit taggé (`b229257`). `composer require adriengras/umami-php:^0.2`.
+
 ### Prochaine chose à creuser
-- **Tag 0.2.0** (CHANGELOG prêt) une fois validé — même procédure que 0.1.0 (attendre CI verte, tag, le hook
-  Packagist synchronise). Puis la lib est « feature-complete » pour le cœur de l'API.
-- Optionnel ensuite : sous-routes annexes à la demande, ou bridge Symfony (BACKLOG).
+- La lib est **feature-complete** pour le cœur de l'API. Pistes restantes (BACKLOG, à la demande) :
+  sous-routes annexes (realtime/shares/export/segments/event-data ; boards/links/pixels ; websites/[id]/reports),
+  ou **bridge Symfony** (paquet séparé).
 
 ### Notes pour future Claude
 - `asArray` = le 3e normaliseur de réponse (après `asObject`/`asList`). À utiliser quand la forme varie.
