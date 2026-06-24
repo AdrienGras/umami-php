@@ -19,12 +19,12 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
   poll jusqu'à indexation, puis tous les endpoints). Porte verte (137 unit).
 - Mémoire : INDEX, API_UMAMI (✅ realtime + event-data, ⚠ levés), QUIRKS, BACKLOG, CHANGELOG (**1.0.0**), ce HANDOFF.
 
-### Trucs en suspens — RELEASE 1.0
-- **Tag `v1.0.0` à pousser** (CHANGELOG prêt, marque l'API stable / SemVer). Même procédure : attendre CI verte
-  sur le commit, tag annoté + GitHub Release, le hook Packagist synchronise. **Confirmer l'intention 1.0 avec Adrien
-  avant le tag** (engagement de stabilité).
-- Sous-routes encore déférées (BACKLOG) : shares, export, segments, session-data, revenue/sessions,
-  team boards/links/pixels, websites/[id]/reports.
+### Release 1.0 — ✅ FAIT
+- **`v1.0.0` taggée + GitHub Release (latest) + publiée sur Packagist** (synchro auto vérifiée :
+  v1.0.0/v0.2.0/v0.1.0). CI verte sur le commit taggé (`328a673`). **API publique gelée (SemVer)** :
+  plus de breaking change sans 2.0. `composer require adriengras/umami-php` → 1.0.
+- Sous-routes encore déférées (BACKLOG, à la demande, en mineures 1.x) : shares, export, segments,
+  session-data, revenue/sessions, team boards/links/pixels, websites/[id]/reports.
 
 ### Notes pour future Claude
 - `AbstractEventDataRequest` : pour ajouter une sous-route event-data, sous-classe + `path()`. Même pattern
