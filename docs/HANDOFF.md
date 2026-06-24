@@ -17,13 +17,17 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
   badges README (CI, Packagist version, PHP version, License).
 - `composer validate --strict` ✅, porte ✅.
 
-### Trucs en suspens — ACTION UTILISATEUR REQUISE
-- **Tag `v0.1.0` PAS encore créé/poussé** (acte de release, outward-facing → en attente du feu vert d'Adrien).
-  Une fois le tag poussé : Adrien importe le repo sur https://packagist.org (Submit) + active le webhook
-  GitHub→Packagist pour les updates auto. Les badges Packagist resteront « not found » tant que le package
-  n'est pas soumis.
-- CI non encore observée en vrai (premier run au prochain push). Risque connu : le seed attend le login jusqu'à
-  120s — si Umami 3.1.0 boote lentement sur le runner, augmenter la boucle dans `seed-umami.sh`.
+### Fait ensuite (même session)
+- ✅ **Tag `v0.1.0` + GitHub Release poussés** (commit `92df2e2`). CI **verte observée** sur ce commit :
+  Gate 8.2/8.3/8.4/8.5 + Integration (live Umami docker) tous verts.
+- ✅ **Bug compat 8.2 attrapé par la CI et corrigé** : `private const string` (typed constant 8.3+) dans 2 tests
+  d'intégration → dé-typées. Garde ajoutée (`phpstan.neon phpVersion min 80200`). Cf. QUIRKS.
+- Le job CI `integration` boote Umami 3.1.0 + seed en <120s sur le runner — pas de flake observé au 1er run.
+
+### ACTION UTILISATEUR RESTANTE (Adrien)
+- **Importer sur Packagist** : https://packagist.org/packages/submit → URL `https://github.com/AdrienGras/umami-php`
+  → Submit. Puis activer le hook GitHub→Packagist (auto-update des futurs tags). Tant que non soumis, les badges
+  Packagist du README (version/PHP/license) restent « not found » ; le badge CI fonctionne déjà.
 
 ### Prochaine chose à creuser
 - Pousser le tag `v0.1.0` (après OK), vérifier le 1er run CI vert, soumettre à Packagist.
