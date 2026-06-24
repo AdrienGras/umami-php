@@ -24,10 +24,12 @@ Notes informelles à destination de la prochaine session (humaine ou Claude). Fo
   d'intégration → dé-typées. Garde ajoutée (`phpstan.neon phpVersion min 80200`). Cf. QUIRKS.
 - Le job CI `integration` boote Umami 3.1.0 + seed en <120s sur le runner — pas de flake observé au 1er run.
 
-### ACTION UTILISATEUR RESTANTE (Adrien)
-- **Importer sur Packagist** : https://packagist.org/packages/submit → URL `https://github.com/AdrienGras/umami-php`
-  → Submit. Puis activer le hook GitHub→Packagist (auto-update des futurs tags). Tant que non soumis, les badges
-  Packagist du README (version/PHP/license) restent « not found » ; le badge CI fonctionne déjà.
+### Packagist — ✅ FAIT
+- Package **publié** : https://packagist.org/packages/adriengras/umami-php (`v0.1.0`, `php ^8.2`, `saloon ^4.0`, MIT).
+  `composer require adriengras/umami-php` opérationnel. Vérifier que le hook GitHub→Packagist est actif pour que
+  les futurs tags (0.2.0…) se synchronisent automatiquement.
+
+> **0.1.0 entièrement publiée et installable.** Prochaine itération = `ReportEntrypoint` (étape 7.7) → tag 0.2.0.
 
 ### Prochaine chose à creuser
 - Pousser le tag `v0.1.0` (après OK), vérifier le 1er run CI vert, soumettre à Packagist.
